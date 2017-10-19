@@ -50,7 +50,7 @@ lex_1 = vcat( encode([5.375, 0., 0., 0., 0.], d), false, false, false )
 lex_2 = vcat( encode([0.025974, 0., 0., 0., 4.27922], d), false, false, false )
 lex_3 = vcat( encode([0., 6.61538, 0., 0., 0.], d), false, false, false )
 
-@time pop = nsga(500, 50, init, z_ex4, seed=[lex_1, lex_2, lex_3] ,plot_func = plot_pop )
+@time pop = nsga(500, 50, init, z_ex4, seed=[lex_1, lex_2, lex_3] , fplot = plot_pop )
 @time pop = nsga(200, 500, init, z_ex4)
 for i in pop
     i.y = (-).(i.y)

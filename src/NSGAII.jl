@@ -6,11 +6,11 @@ include("crossover.jl")
 include("mutation.jl")
 include("realcoding.jl")
 
-export nsga, realCoding, decode, encode
+export nsga, RealCoding, decode, encode
 
 using ProgressMeter
 
-function nsga(popSize, nbGen, init, z, pMut= 0.05 ; fmut=default_mutation!, fcross = default_crossover, seed=typeof(init())[], plot_func = (x)->nothing)
+function nsga(popSize, nbGen, init, z, pMut= 0.05 ; fmut=default_mutation!, fcross = default_crossover, seed=typeof(init())[], fplot = (x)->nothing)
     P = [indiv(init(), z) for _=1:popSize]
     P[1:length(seed)] .= [indiv(s, z) for s in seed]
     fast_non_dominated_sort!(P)
@@ -53,7 +53,7 @@ function nsga(popSize, nbGen, init, z, pMut= 0.05 ; fmut=default_mutation!, fcro
             end
         end
 
-        plot_func(P)
+        fplot(P)
     end
     P
 end

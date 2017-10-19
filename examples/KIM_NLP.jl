@@ -20,4 +20,4 @@ z(x) = begin
     x1, x2 = decode(x, d)
     z1(x1, x2), z2(x1, x2)
 end
-nsga(300, 20, ()->rand(Bool, d.nbbitstotal), z, plot_func = plot_pop)
+nsga(300, 20, ()->rand(Bool, d.nbbitstotal), z, fplot = plot_pop)
