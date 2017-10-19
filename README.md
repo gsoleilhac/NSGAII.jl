@@ -4,8 +4,6 @@
 
 [![codecov.io](http://codecov.io/github/gsoleilhac/NSGAII.jl/coverage.svg?branch=master)](http://codecov.io/github/gsoleilhac/NSGAII.jl?branch=master)
 
-*A generic NSGAII implementation in Julia*
-
 ## Installation
 `Pkg.clone("https://github.com/gsoleilhac/NSGAII.jl")`
 
