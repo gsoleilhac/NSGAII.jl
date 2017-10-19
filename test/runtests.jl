@@ -21,7 +21,8 @@ z(bits) = begin
     x = decode(bits, d)[1]
     z1(x), z2(x)
 end
-res = nsga(500, 200, ()->rand(Bool, d.nbbitstotal), z)
+seed = encode.([-10 + rand()*20 for _ =1:100] ,d)
+res = nsga(500, 200, ()->rand(Bool, d.nbbitstotal), z, seed = seed)
 
 @test maximum(x -> x.y[1], res) >= 3.99
 @test minimum(x -> x.y[1], res) <= 1e-4
