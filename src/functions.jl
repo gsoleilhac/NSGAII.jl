@@ -65,26 +65,3 @@ function tournament_selection(P)
     a, b = rand(P), rand(P)
     a < b ? a : b
 end
-
-
-
-
-function uniplot(P)
-    show(scatterplot(map(x -> x.y[1], P), map(x -> x.y[2], P), width = 60, height = 30))
-    sleep(0.2)
-end
-
-function pyplot(P::Vector{indiv{X,Y}}) where {X, Y<:NTuple{2}}
-    clf()
-    p = plot(map(x -> x.y[1], P), map(x -> x.y[2], P), "bo", markersize=1)
-    !isinteractive() && show()
-    sleep(0.2)
-end
-
-function pyplot(P::Vector{indiv{X,Y}}) where {X, Y<:NTuple{3}}
-    clf()
-    pop = filter(x -> all(x.y .< 5000), P)
-    p = plot3D(map(x -> x.y[1], pop), map(x -> x.y[2], pop), map(x -> x.y[3], pop), "bo", markersize=1)
-    !isinteractive() && show()
-    sleep(0.2)
-end
