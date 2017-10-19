@@ -1,11 +1,11 @@
-struct RealData
+struct RealCoding
     nbvar::Int
     lb::Vector{Float64}
     ub::Vector{Float64}
     nbbits::Vector{Int}
     nbbitstotal::Int
 end
-RealData(ϵ::Vector{Int}, lb, ub) = begin
+RealCoding(ϵ::Vector{Int}, lb, ub) = begin
     nbvar = length(lb)
     nbbits = ones(Int, nbvar)
     for i = 1:nbvar
@@ -13,11 +13,11 @@ RealData(ϵ::Vector{Int}, lb, ub) = begin
             nbbits[i] += 1
         end
     end
-    RealData(nbvar, lb, ub, nbbits, sum(nbbits))
+    RealCoding(nbvar, lb, ub, nbbits, sum(nbbits))
 end
-RealData(ϵ::Int, lb, ub) = RealData([ϵ for _=1:length(lb)], lb, ub)
+RealCoding(ϵ::Int, lb, ub) = RealCoding([ϵ for _=1:length(lb)], lb, ub)
 
-function decode(x, d::RealData)::Vector{Float64}
+function decode(x, d::RealCoding)::Vector{Float64}
 
     res = zeros(d.nbvar)
     for i = 1:d.nbvar
@@ -34,7 +34,7 @@ function decode(x, d::RealData)::Vector{Float64}
     res
 end
 
-function encode(x, d::RealData)::Vector{Bool}
+function encode(x, d::RealCoding)::Vector{Bool}
 
     res = Bool[]
     for i = 1:d.nbvar

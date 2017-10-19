@@ -26,7 +26,7 @@ z2(x, δ) = dot([2,-6,0,-12,13], x) + dot([-61,-79,-53], δ)
 z3(x, δ) = dot([-20,7,-16,0,-1], x) + dot([-72,-54,-79], δ)
 
 
-d = RealData(6, zeros(5), fill(10, 5))
+d = RealCoding(6, zeros(5), fill(10, 5))
 init = ()->rand(Bool, d.nbbitstotal + 3) #+ 3 bits pour δ
 _decode(x) = decode(x[1:end-3], d), x[end-2:end] #renvoie un tuple : Tableau de 5 float décodés, + tableau des 3 derniers booléens tels quels.
 

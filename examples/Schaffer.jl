@@ -12,7 +12,7 @@ function plot_pop(P)
     sleep(0.2)
 end
 
-const d = RealData(6, [-10], [10])
+const d = RealCoding(6, [-10], [10])
 z1(x) = x^2
 z2(x) = (x-2)^2
 z(bits) = begin 

@@ -6,7 +6,7 @@ include("crossover.jl")
 include("mutation.jl")
 include("realcoding.jl")
 
-export nsga, RealData, decode, encode
+export nsga, realCoding, decode, encode
 
 using ProgressMeter
 

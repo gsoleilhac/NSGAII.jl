@@ -13,7 +13,7 @@ function plot_pop(P)
 end
 
 
-const d = RealData(8, [-3, -3], [6, 6])
+const d = RealCoding(8, [-3, -3], [6, 6])
 z1(x1, x2) = -(3(1-x1)^2 * exp(-x1^2 - (x2+1)^2) - 10(x1/5 - x1^3 - x2^5) * exp(-x1^2-x2^2) -3exp(-(x1+2)^2 - x2^2) + 0.5(2x1 + x2))
 z2(x1, x2) = -(3(1+x2)^2 * exp(-x2^2 - (1-x1)^2) - 10(-x2/5 + x2^3 + x1^5) * exp(-x1^2-x2^2) - 3exp(-(2-x2)^2 - x1^2))
 z(x) = begin 
