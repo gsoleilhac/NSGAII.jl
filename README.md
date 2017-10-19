@@ -6,6 +6,10 @@
 
 *A generic NSGAII implementation in Julia*
 
+## Installation
+`Pkg.clone("https://github.com/gsoleilhac/NSGAII.jl")`
+
+
 ## Usage : 
 
 ```
