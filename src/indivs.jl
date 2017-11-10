@@ -23,10 +23,17 @@ end
 import Base.==; ==(a::indiv, b::indiv) = a.x == b.x
 import Base.hash; hash(a::indiv) = hash(a.x)
 import Base.isless; isless(a::indiv, b::indiv) = a.rank < b.rank || a.rank == b.rank && a.crowding >= b.crowding #Comparison operator for tournament selection
+
 import Base.show; show(io::IO, ind::indiv) = print(io, "ind($(ind.x) : $(ind.y) | rank : $(ind.rank))")
+
 function show(io::IO, ind::indiv{X, Y}) where {X<:AbstractArray{Bool}, Y}
-    print(io, "ind(") ; show(IOContext(io, limit=true, compact=true), Int.(ind.x)) ; print(io, " : $(ind.y) | rank : $(ind.rank))")
-end
+    genotype = String([xx?'1':'0' for xx in ind.x])
+    if VERSION >= v"0.7"
+        print(io, "ind(") ; show(IOContext(io, :limit=>true, :compact=>true), genotype) ; print(io, " : $(ind.y) | rank : $(ind.rank))")
+    else
+        print(io, "ind(") ; show(IOContext(io, limit=true, compact=true), genotype) ; print(io, " : $(ind.y) | rank : $(ind.rank))")
+    end
+end 
 
 function eval!(indiv::indiv, z::Function)
     indiv.y = z(indiv.x)

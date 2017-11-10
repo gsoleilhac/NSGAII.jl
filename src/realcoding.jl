@@ -6,10 +6,14 @@ struct RealCoding
     nbbitstotal::Int
 end
 RealCoding(ϵ::Vector{Int}, lb, ub) = begin
+    @assert length(lb)==length(ub)
+    for i = 1:length(lb)
+        @assert lb[i] < ub[i]
+    end
     nbvar = length(lb)
     nbbits = ones(Int, nbvar)
     for i = 1:nbvar
-        while ((ub[i]-lb[i])*(10^ϵ[i]) >= 2^nbbits[i])
+        while ((Int128(10)^ϵ[i])*(ub[i]-lb[i]) >= Int128(2)^nbbits[i])
             nbbits[i] += 1
         end
     end
@@ -34,11 +38,11 @@ function decode(x, d::RealCoding)::Vector{Float64}
     res
 end
 
-function encode(x, d::RealCoding)::Vector{Bool}
+function encode(x, d::RealCoding)::BitVector
 
-    res = Bool[]
+    res = BitArray(0)
     for i = 1:d.nbvar
-        tab = [false for i = 1:d.nbbits[i]]
+        tab = falses(d.nbbits[i])
         ind = 1
         puis = 2^(d.nbbits[i] - 1)
         val = 0
