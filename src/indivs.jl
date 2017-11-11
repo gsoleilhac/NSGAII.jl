@@ -27,8 +27,8 @@ import Base.isless; isless(a::indiv, b::indiv) = a.rank < b.rank || a.rank == b.
 import Base.show; show(io::IO, ind::indiv) = print(io, "ind($(ind.x) : $(ind.y) | rank : $(ind.rank))")
 
 function show(io::IO, ind::indiv{X, Y}) where {X<:AbstractArray{Bool}, Y}
-    genotype = String([xx?'1':'0' for xx in ind.x])
-    if VERSION >= v"0.7"
+    genotype = String([xx ? '1' : '0' for xx in ind.x])
+    if VERSION >= v"0.7-"
         print(io, "ind(") ; show(IOContext(io, :limit=>true, :compact=>true), genotype) ; print(io, " : $(ind.y) | rank : $(ind.rank))")
     else
         print(io, "ind(") ; show(IOContext(io, limit=true, compact=true), genotype) ; print(io, " : $(ind.y) | rank : $(ind.rank))")
