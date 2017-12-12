@@ -57,7 +57,7 @@ nsga(popsize, nbGen, init, z, fplot = plot_pop)
 
 `RealCoding(eps, lb, ub)` and `decode(x, d::RealCoding)` can be used to easily represent Real values with eps decimal places.
 
-`encode(x, d)` can be used for to provide starting solutions
+`encode(x, d)` can be used to provide starting solutions
 
 ```
 d = RealCoding(6, [-3, -3], [6, 6]) #Codes two reals with 6 decimal places with lower bound -3 and upper bound 6
