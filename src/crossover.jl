@@ -1,3 +1,8 @@
+function crossover(ind_a::indiv{X,N,Y}, ind_b::indiv{X,N,Y}, fcross::Function)::Tuple{indiv{X,N,Y}, indiv{X,N,Y}} where {X,N,Y}
+    c1, c2 = fcross(ind_a.x, ind_b.x)
+    return indiv(c1, ind_a.y, 0.), indiv(c2, ind_a.y, 0.) #c.y and c.CV will be set later
+end
+
 function two_point_crossover(bits_a, bits_b)
     cut_a = cut_b = rand(2:length(bits_a)-1)
     while(cut_b == cut_a)
@@ -8,7 +13,6 @@ function two_point_crossover(bits_a, bits_b)
     child2 = vcat(bits_b[1:cut_a-1], bits_a[cut_a:cut_b], bits_b[cut_b+1:end])
     child1, child2
 end
-
 (default_crossover(ba::T, bb::T)) where T<:AbstractVector{Bool} = two_point_crossover(ba, bb)
 
 function PMX_crossover(pa, pb)
@@ -41,8 +45,3 @@ function PMX_crossover(pa, pb)
     ca, cb
 end
 (default_crossover(ba::T, bb::T)) where T<:AbstractVector{Int} = PMX_crossover(ba, bb)
-
-function crossover(ind_a::indiv{X,Y}, ind_b::indiv{X,Y}, f::Function)::Tuple{indiv{X,Y}, indiv{X,Y}} where {X,Y}
-    c1, c2 = f(ind_a.x, ind_b.x)
-    return indiv(c1, Tuple(zeros(eltype(ind_a.y), length(ind_a.y)))), indiv(c2, Tuple(zeros(eltype(ind_a.y), length(ind_a.y))))
-end

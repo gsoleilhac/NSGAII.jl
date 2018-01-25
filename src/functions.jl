@@ -35,7 +35,7 @@ function fast_non_dominated_sort!(pop::Vector{T}) where {T}
     res
 end
 
-function crowding_distance_assignement!(pop::Vector{indiv{X,Y}}) where {X, Y<:NTuple{2}}
+function crowding_distance_assignement!(pop::Vector{indiv{X,2,Y}}) where {X, Y}
     sort!(pop, by = x-> x.y[1])
     pop[1].crowding = pop[end].crowding = Inf
     for i = 2:length(pop)-1
@@ -44,7 +44,7 @@ function crowding_distance_assignement!(pop::Vector{indiv{X,Y}}) where {X, Y<:NT
     end
 end
 
-function crowding_distance_assignement!(pop::Vector{indiv{X,Y}}) where {X,Y}
+function crowding_distance_assignement!(pop::Vector{indiv{X,N,Y}}) where {X,N,Y}
     for ind in pop
         ind.crowding = 0.
     end

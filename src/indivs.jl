@@ -1,16 +1,19 @@
-mutable struct indiv{X, Y}
+mutable struct indiv{X, N, Y}
     x::X
-    y::Y
+    y::NTuple{N, Y}
+    CV::Float64
     rank::Int
     crowding::Float64
     dom_count::Int
-    dom_list::Vector{indiv{X,Y}}
-    indiv(x::X, y::Y) where {X,Y} = new{X, Y}(x, y, 0, 0., 0, indiv{X,Y}[])
+    dom_list::Vector{indiv{X,N,Y}}
+    indiv(x::X, y::NTuple{N, Y}, cv) where {X,N,Y} = new{X, N, Y}(x, y, cv, 0, 0., 0, indiv{X,N,Y}[])
 end
-indiv(x, z::Function) = indiv(x, z(x))
+indiv(x, z::Function, fCV::Function) = indiv(x, z(x), fCV(x))
 
 
 function dominates(a::indiv, b::indiv)
+    a.CV != b.CV && return a.CV < b.CV
+
     res = false
     for i in eachindex(a.y)
         a.y[i] > b.y[i] && return false
@@ -35,7 +38,8 @@ function show(io::IO, ind::indiv{X, Y}) where {X<:AbstractArray{Bool}, Y}
     end
 end 
 
-function eval!(indiv::indiv, z::Function)
+function eval!(indiv::indiv, z::Function, fCV::Function)
     indiv.y = z(indiv.x)
+    indiv.CV = fCV(indiv.x)
     indiv
 end
