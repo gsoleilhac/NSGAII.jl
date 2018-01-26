@@ -62,9 +62,9 @@ end
 
 
 @require vOptGeneric begin
-function nsga(popSize, nbGen, m, ϵ = 5; seed = Vector{Float64}[], kwargs...)
+function nsga(popSize, nbGen, m, ϵ = 5; seed::Vector{Vector{T}} = Vector{Float64}[], kwargs...) where T<:Number
 
-    vd = @eval Main getvOptData(m)
+    vd = m.ext[:vOpt]
     @assert all(isfinite, m.colLower) "All variables must be bounded"
     @assert all(isfinite, m.colUpper) "All variables must be bounded"
     
@@ -131,22 +131,24 @@ function nsga(popSize, nbGen, m, ϵ = 5; seed = Vector{Float64}[], kwargs...)
 
     encoded_seed = map(x->encode(x, d), seed)
 
-    res = nsga(popSize, nbGen, init, z ; fCV = CV, seed=encoded_seed, kwargs...)
+    let d=d, vd=vd, init=init, z=z, CV=CV, encoded_seed=encoded_seed
+        res = nsga(popSize, nbGen, init, z ; fCV = CV, seed=encoded_seed, kwargs...)
 
-    for i = 1:length(vd.objs)
-        if vd.objSenses[i] == :Max
-            vd.objs[i] = vd.objs[i] * -1
+        for i = 1:length(vd.objs)
+            if vd.objSenses[i] == :Max
+                vd.objs[i] = vd.objs[i] * -1
+            end
         end
+
+        signs = Tuple(s == :Min ? 1 : -1 for s in vd.objSenses)
+
+        for indiv in res
+            indiv.y = indiv.y .* signs
+        end
+
+        [(decode(ind.x, d), ind.y, ind.CV) for ind in res]
+
     end
-
-    signs = Tuple(s == :Min ? 1 : -1 for s in vd.objSenses)
-
-    for indiv in res
-        indiv.y = indiv.y .* signs
-    end
-
-    [(decode(ind.x, d), ind.y, ind.CV) for ind in res]
-
 end
 end
 
