@@ -82,6 +82,6 @@ nsga(100, 50, ()->bitrand(d.nbbitstotal), z, seed=seed)
 
 ## vOptGeneric
 
-This package supports models declared with JuMP / vOptGeneric, with the restriction that all variables must be bounded, and that they're either continuous or binary (integer might get added later)
+This package supports models declared with JuMP / vOptGeneric, with the restriction that all variables must be bounded.
 
 See examples/Mavrota_MILP.jl
