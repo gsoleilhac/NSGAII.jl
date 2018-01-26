@@ -57,6 +57,7 @@ end
 
 function encode(x, d::MixedCoding)::BitVector
     res = BitVector(0)
+    sizehint!(res, d.nbbitstotal)
     for i = 1:d.nbvar
         if d.types[i] == :Int
             tab = reverse(digits(Bool, round(Int, x[i] + d.lb[i]), 2, d.nbbits[i]))
