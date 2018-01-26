@@ -40,12 +40,13 @@ m = vModel(solver = GLPKSolverMIP())
 
 print(m)
 
-res = nsga(500, 50, m, pmut=0.3, fplot=plot_pop);
+res = nsga(500, 50, m, fplot=plot_pop);
 
 solve(m, method=:lex)
 println("\nRésolution lexico-graphique : ")
-for i = 1:6
-    @show getY_N(m)[i], getvalue(x, i), getvalue(δ, i)
+for i = 1:2:6
+    println("x = $(getvalue(x, i)) , δ = $(getvalue(δ, i))")
+    println("z = $(getY_N(m)[i])")
 end
 
 println()
@@ -74,7 +75,7 @@ println("\n Résolution en partant des solutions lex-optimales")
 
 seed = [vcat(getvalue(x, i), getvalue(δ, i)) for i=1:2:6]
 
-res = nsga(500, 50, m, pmut=0.3, fplot=plot_pop, seed=seed);
+res = nsga(500, 50, m, fplot=plot_pop, seed=seed);
 
 println()
 println("Meilleur individu sur le premier objectif")
