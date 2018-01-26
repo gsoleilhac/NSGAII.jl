@@ -4,13 +4,12 @@ include("indivs.jl")
 include("functions.jl")
 include("crossover.jl")
 include("mutation.jl")
-include("realcoding.jl")
+include("mixedcoding.jl")
 
-export nsga, RealCoding, decode, encode
-
+export nsga, MixedCoding, RealCoding, decode, encode
 using ProgressMeter, Requires
 
-function nsga(popSize::Integer, nbGen::Integer, init, z ; fCV = x->0., pmut= 0.05, fmut=default_mutation!, fcross = default_crossover, seed=typeof(init())[], fplot = (x)->nothing)
+function nsga(popSize::Integer, nbGen::Integer, init::Function, z::Function ; fCV = x->0., pmut= 0.05, fmut=default_mutation!, fcross = default_crossover, seed=typeof(init())[], fplot = (x)->nothing)
 
 
     X = typeof(init())
@@ -63,15 +62,13 @@ end
 
 
 @require vOptGeneric begin
-function nsga(popSize, nbGen, m ; kwargs...)
+function nsga(popSize, nbGen, m, ϵ = 5; seed = Vector{Float64}[], kwargs...)
 
     vd = @eval Main getvOptData(m)
     @assert all(isfinite, m.colLower) "All variables must be bounded"
     @assert all(isfinite, m.colUpper) "All variables must be bounded"
-
-    @assert !(:Int in m.colCat) "Only continuous and binary variables are supported"
-    ϵ = map(x -> x==:Cont ? 5 : 0, m.colCat)
-    d = RealCoding(ϵ, m.colLower, m.colUpper)
+    
+    d = MixedCoding(ϵ, m.colCat, m.colLower, m.colUpper)
 
     init = () -> bitrand(d.nbbitstotal)
 
@@ -116,6 +113,13 @@ function nsga(popSize, nbGen, m ; kwargs...)
                 end
             end
         end
+
+        for i in find(m.colCat.==:Int)
+            if x[i] > m.colUpper[i]
+                res += m.colUpper - x[i]
+            end
+        end
+
         res
     end
 
@@ -125,8 +129,9 @@ function nsga(popSize, nbGen, m ; kwargs...)
         end
     end
 
-    @code_warntype nsga(popSize, nbGen, init, z ; fCV = CV, kwargs...)
-    res = nsga(popSize, nbGen, init, z ; fCV = CV, kwargs...)
+    encoded_seed = map(x->encode(x, d), seed)
+
+    res = nsga(popSize, nbGen, init, z ; fCV = CV, seed=encoded_seed, kwargs...)
 
     for i = 1:length(vd.objs)
         if vd.objSenses[i] == :Max
@@ -135,8 +140,6 @@ function nsga(popSize, nbGen, m ; kwargs...)
     end
 
     signs = Tuple(s == :Min ? 1 : -1 for s in vd.objSenses)
-
-    @show signs
 
     for indiv in res
         indiv.y = indiv.y .* signs
