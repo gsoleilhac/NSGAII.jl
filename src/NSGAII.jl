@@ -19,7 +19,7 @@ end
 
 
 @require vOptGeneric begin
-function nsga(popSize, nbGen, m, ϵ = 5; seed::Vector{Vector{T}} = Vector{Float64}[], kwargs...) where T<:Number
+function nsga(popSize, nbGen, m, ϵ = 5; kwargs...)
 
     vd = m.ext[:vOpt]
     @assert all(isfinite, m.colLower) "All variables must be bounded"
@@ -78,10 +78,8 @@ function nsga(popSize, nbGen, m, ϵ = 5; seed::Vector{Vector{T}} = Vector{Float6
         end
     end
 
-    encoded_seed = map(x->encode(x, mc), seed)
-
-    let mc=mc, vd=vd, z=z, CV=CV, encoded_seed=encoded_seed
-        res = nsga(popSize, nbGen, z, mc ; fCV = CV, seed=encoded_seed, kwargs...)
+    let mc=mc, vd=vd, z=z, CV=CV
+        res = nsga(popSize, nbGen, z, mc ; fCV = CV, kwargs...)
 
         for i = 1:length(vd.objs)
             if vd.objSenses[i] == :Max

@@ -66,7 +66,6 @@ function encode(x, d::MixedCoding)::BitVector
             push!(res, x[i]!=0)
         else
             t = (x[i] - d.lb[i]) / (d.ub[i] - d.lb[i]) * (UInt128(2)^d.nbbits[i] - 1)
-            @show t
             target = round(UInt128, t)
             if target == UInt128(2)^d.nbbits[i] - 1
                 target -= 1

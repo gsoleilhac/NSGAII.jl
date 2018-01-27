@@ -9,20 +9,14 @@ const C3 = [4 2 5 3 ; 5 3 4 3 ; 4 3 5 2 ; 6 4 7 3]
 z(x, C) = sum(inds->C[inds...], enumerate(x))
 z(x::Vector{Int}) = z(x, C1), z(x, C2), z(x, C3)
 
-res = unique(nsga(500, 100, ()->randperm(4), z))
-@show res
+res = unique(nsga(500, 100, z, ()->randperm(4)))
 @test length(res) == 7
 
 
 const d = RealCoding(6, [-10], [10])
-z1(x) = x^2
-z2(x) = (x-2)^2
-z(bits) = begin 
-    x = decode(bits, d)[1]
-    z1(x), z2(x)
-end
-seed = encode.([-10 + rand()*20 for _ =1:100] ,d)
-res = nsga(500, 200, ()->rand(Bool, d.nbbitstotal), z, seed = seed)
+z(x) = x[1]^2, (x[1] - 2)^2
+seed = [-10 + rand()*20 for _ =1:100]
+res = nsga(500, 200, z, d, seed = seed)
 
 @test maximum(x -> x.y[1], res) >= 3.99
 @test minimum(x -> x.y[1], res) <= 1e-4
