@@ -1,5 +1,5 @@
 module NSGAII
-export nsga, MixedCoding, RealCoding, decode, encode
+export nsga, MixedCoding, RealCoding
 using ProgressMeter, Requires
 
 include("indivs.jl")
