@@ -18,7 +18,7 @@ const C3 = [4 2 5 3 ; 5 3 4 3 ; 4 3 5 2 ; 6 4 7 3]
 z(x, C) = sum(inds->C[inds...], enumerate(x))
 z(x::Vector{Int}) = z(x, C1), z(x, C2), z(x, C3)
 
-res = nsga(200, 50, ()->randperm(4), z)
+res = nsga(200, 50, z, ()->randperm(4))
 
 for x in unique(res)
     println(x)

@@ -1,4 +1,6 @@
 module NSGAII
+export nsga, MixedCoding, RealCoding, decode, encode
+using ProgressMeter, Requires
 
 include("indivs.jl")
 include("functions.jl")
@@ -6,58 +8,13 @@ include("crossover.jl")
 include("mutation.jl")
 include("mixedcoding.jl")
 
-export nsga, MixedCoding, RealCoding, decode, encode
-using ProgressMeter, Requires
 
-function nsga(popSize::Integer, nbGen::Integer, init::Function, z::Function ; fCV = x->0., pmut= 0.05, fmut=default_mutation!, fcross = default_crossover, seed=typeof(init())[], fplot = (x)->nothing)
+function nsga(popSize::Integer, nbGen::Integer, z::Function, init::Function ; fdecode=identity, fCV = x->0., pmut= 0.05, fmut=default_mutation!, fcross = default_crossover, seed=typeof(init())[], fplot = (x)->nothing)
+    _nsga(popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot)
+end
 
-
-    X = typeof(init())
-    P = [indiv(init(), z, fCV) for _=1:popSize-length(seed)]
-    append!(P, indiv.(convert.(X, seed),z, fCV))
-    fast_non_dominated_sort!(P)
-    Q = similar(P)
-
-    @showprogress 0.1 for gen = 1:nbGen
-        
-        for i = 1:popSize
-            pa = tournament_selection(P)
-            pb = tournament_selection(P)
-            ca,cb = crossover(pa, pb, fcross)
-
-            rand() < pmut && mutate!(ca, fmut)
-            rand() < pmut && mutate!(cb, fmut)
-
-            eval!(ca, z, fCV)
-            eval!(cb, z, fCV)
-
-            if ca ⋖ cb
-                Q[i] = ca
-            elseif cb ⋖ ca
-                Q[i] = cb
-            else
-                Q[i] = ifelse(rand(Bool), ca, cb)
-            end
-        end
-
-        F = fast_non_dominated_sort!(vcat(P, Q))
-        i = 1
-        empty!(P)
-        while length(P) + length(F[i]) <= popSize
-            append!(P, F[i])
-            i += 1
-        end
-        if length(P) != popSize
-            crowding_distance_assignement!(F[i])
-            sort!(F[i], by = x -> x.crowding)
-            while length(P) < popSize
-                push!(P, pop!(F[i]))
-            end
-        end
-
-        fplot(P)
-    end
-    P
+function nsga(popSize::Integer, nbGen::Integer, z::Function, mc::MixedCoding, init::Function=()->bitrand(mc.nbbitstotal); fCV = x->0., pmut= 0.05, fmut=default_mutation!, fcross = default_crossover, seed=Vector{Float64}[], fplot = (x)->nothing)
+    _nsga(popSize, nbGen, init, z, x->decode(x, mc), fCV , pmut, fmut, fcross, encode.(seed, mc), fplot)
 end
 
 
@@ -68,21 +25,13 @@ function nsga(popSize, nbGen, m, ϵ = 5; seed::Vector{Vector{T}} = Vector{Float6
     @assert all(isfinite, m.colLower) "All variables must be bounded"
     @assert all(isfinite, m.colUpper) "All variables must be bounded"
     
-    d = MixedCoding(ϵ, m.colCat, m.colLower, m.colUpper)
+    mc = MixedCoding(ϵ, m.colCat, m.colLower, m.colUpper)
 
-    init = () -> bitrand(d.nbbitstotal)
+    evaluate(obj, x) = dot(obj.aff.coeffs, x[map(v-> getfield(v, :col), obj.aff.vars)]) + obj.aff.constant
 
-    function evaluate(obj, x)
-        dot(obj.aff.coeffs, x[map(v-> getfield(v, :col), obj.aff.vars)]) + obj.aff.constant
-    end
+    z(x) = ((evaluate(obj, x) for obj in vd.objs)...)
 
-    function z(bits)
-        x = decode(bits, d)
-        ((evaluate(obj, x) for obj in vd.objs)...)
-    end
-
-    function CV(bits)
-        x = decode(bits, d)
+    function CV(x)
         res = 0.
         for CSTR in m.linconstr
 
@@ -129,10 +78,10 @@ function nsga(popSize, nbGen, m, ϵ = 5; seed::Vector{Vector{T}} = Vector{Float6
         end
     end
 
-    encoded_seed = map(x->encode(x, d), seed)
+    encoded_seed = map(x->encode(x, mc), seed)
 
-    let d=d, vd=vd, init=init, z=z, CV=CV, encoded_seed=encoded_seed
-        res = nsga(popSize, nbGen, init, z ; fCV = CV, seed=encoded_seed, kwargs...)
+    let mc=mc, vd=vd, z=z, CV=CV, encoded_seed=encoded_seed
+        res = nsga(popSize, nbGen, z, mc ; fCV = CV, seed=encoded_seed, kwargs...)
 
         for i = 1:length(vd.objs)
             if vd.objSenses[i] == :Max
@@ -146,7 +95,7 @@ function nsga(popSize, nbGen, m, ϵ = 5; seed::Vector{Vector{T}} = Vector{Float6
             indiv.y = indiv.y .* signs
         end
 
-        [(decode(ind.x, d), ind.y, ind.CV) for ind in res]
+        [(ind.pheno, ind.y, ind.CV) for ind in res]
 
     end
 end

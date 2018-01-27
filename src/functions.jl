@@ -1,3 +1,53 @@
+function _nsga(popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot)
+
+    X = typeof(init())
+    P = [indiv(init(), fdecode, z, fCV) for _=1:popSize-length(seed)]
+    append!(P, indiv.(convert.(X, seed), fdecode, z, fCV))
+    fast_non_dominated_sort!(P)
+    Q = similar(P)
+
+    @showprogress 0.1 for gen = 1:nbGen
+        
+        for i = 1:popSize
+            pa = tournament_selection(P)
+            pb = tournament_selection(P)
+            ca,cb = crossover(pa, pb, fcross)
+
+            rand() < pmut && mutate!(ca, fmut)
+            rand() < pmut && mutate!(cb, fmut)
+
+            eval!(ca, fdecode, z, fCV)
+            eval!(cb, fdecode, z, fCV)
+
+            if ca ⋖ cb
+                Q[i] = ca
+            elseif cb ⋖ ca
+                Q[i] = cb
+            else
+                Q[i] = ifelse(rand(Bool), ca, cb)
+            end
+        end
+
+        F = fast_non_dominated_sort!(vcat(P, Q))
+        i = 1
+        empty!(P)
+        while length(P) + length(F[i]) <= popSize
+            append!(P, F[i])
+            i += 1
+        end
+        if length(P) != popSize
+            crowding_distance_assignement!(F[i])
+            sort!(F[i], by = x -> x.crowding)
+            while length(P) < popSize
+                push!(P, pop!(F[i]))
+            end
+        end
+
+        fplot(P)
+    end
+    P
+end
+
 function fast_non_dominated_sort!(pop::Vector{T}) where {T}
     F = T[]
     for p in pop
@@ -35,7 +85,7 @@ function fast_non_dominated_sort!(pop::Vector{T}) where {T}
     res
 end
 
-function crowding_distance_assignement!(pop::Vector{indiv{X,2,Y}}) where {X, Y}
+function crowding_distance_assignement!(pop::Vector{indiv{X,G,2,Y}}) where {X, G, Y}
     sort!(pop, by = x-> x.y[1])
     pop[1].crowding = pop[end].crowding = Inf
     for i = 2:length(pop)-1
@@ -44,7 +94,7 @@ function crowding_distance_assignement!(pop::Vector{indiv{X,2,Y}}) where {X, Y}
     end
 end
 
-function crowding_distance_assignement!(pop::Vector{indiv{X,N,Y}}) where {X,N,Y}
+function crowding_distance_assignement!(pop::Vector{indiv{X,G,N,Y}}) where {X,G,N,Y}
     for ind in pop
         ind.crowding = 0.
     end

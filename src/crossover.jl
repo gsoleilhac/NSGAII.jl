@@ -1,6 +1,6 @@
-function crossover(ind_a::indiv{X,N,Y}, ind_b::indiv{X,N,Y}, fcross::Function)::Tuple{indiv{X,N,Y}, indiv{X,N,Y}} where {X,N,Y}
+function crossover(ind_a, ind_b, fcross)
     c1, c2 = fcross(ind_a.x, ind_b.x)
-    return indiv(c1, ind_a.y, 0.), indiv(c2, ind_a.y, 0.) #c.y and c.CV will be set later
+    return indiv(c1, ind_a.pheno, ind_a.y, 0.), indiv(c2, ind_a.pheno, ind_a.y, 0.) #phenotypes, objective value and CV value will be calculated later, after mutation
 end
 
 function two_point_crossover(bits_a, bits_b)

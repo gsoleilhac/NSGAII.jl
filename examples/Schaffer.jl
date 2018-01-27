@@ -13,10 +13,5 @@ function plot_pop(P)
 end
 
 const d = RealCoding(6, [-10], [10])
-z1(x) = x^2
-z2(x) = (x-2)^2
-z(bits) = begin 
-    x = decode(bits, d)[1]
-    z1(x), z2(x)
-end
-nsga(200, 20, ()->rand(Bool, d.nbbitstotal), z, fplot = plot_pop)
+z(x) = ( x[1]^2 , (x[1]-2)^2 )
+nsga(200, 20, z, d, fplot = plot_pop)

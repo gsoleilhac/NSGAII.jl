@@ -15,19 +15,21 @@ popsize = 200
 nbGenerations = 100
 
 #define how to generate a random genotype : 
-init_function = () -> randperm(N) #e.g : a permutation coding
+init() = randperm(N) #e.g : a permutation coding
 
-#define how to evaluate a genotype : 
+#define how to evaluate a phenotype :
 z(x) = z1(x), z2(x) ... # Must return a Tuple
 
-nsga(popsize, nbGenerations, init_function, z)
+nsga(popsize, nbGenerations, z, init)
+
+#By default, the identity function is used to calculate the phenotype from the genotype but this can be changed with the keyword fdecode
 
 #A constraint violation function can be passed with the keyword fCV
 #It should return 0. if the solution is feasible and a value > 0 otherwise.
 
 #Mutation probability can be changed with the keyword pmut (default is 5%)
 
-nsga(popsize, nbGen, init_fun, z, H, fCV = CV, pmut = 0.1)
+nsga(popsize, nbGen, z, init, fCV = (genotype) -> ... , fdecode = (phenotype) -> ... pmut = 0.2)
 
 ```
 
@@ -38,14 +40,14 @@ and a two-point crossover and random flips will be used for Vector{Bool} / BitAr
 Other crossover / mutations operators can be passed with the keywords `fmut` and `fcross`
 
 ```
-nsga(popsize, nbGen, init, z , fmut = ..., fcross = ...)
+nsga(popsize, nbGen, z, init, fmut = ..., fcross = ...)
 ```
 
-Starting solutions are defined with the keyword `seed`
+Starting solutions are defined with the keyword `seed` ; they must be valid genotypes
 e.g : 
 ```
 x1, x2, x3 = greedy(...)
-nsga(popsize, nbGen, init, z, seed = [x1, x2, x3])
+nsga(popsize, nbGen, z, init, seed = [x1, x2, x3])
 ```
 
 A plot function can be passed with the keyword `fplot`
@@ -57,26 +59,20 @@ function plot_pop(P)
     sleep(0.2)
 end
 
-nsga(popsize, nbGen, init, z, fplot = plot_pop)
+nsga(popsize, nbGen, z, init, fplot = plot_pop)
 ```
 
 ## RealCoding
 
-`RealCoding(eps, lb, ub)` and `decode(x, d::RealCoding)` can be used to easily represent Real values with eps decimal places.
-
-`encode(x, d)` can be used to provide starting solutions
+`RealCoding(eps, lb, ub)` can be used to easily represent Real values with eps decimal places.
 
 ```
-d = RealCoding(6, [-3, -3], [6, 6]) #Codes two reals with 6 decimal places with lower bound -3 and upper bound 6
-z1(x1, x2) = -(3(1-x1)^2 * exp(-x1^2 - (x2+1)^2) - ...)
-z2(x1, x2) = -(3(1+x2)^2 * exp(-x2^2 - (1-x1)^2) - ...)
-z(x) = begin 
-    x1, x2 = decode(x, d)
-    z1(x1, x2), z2(x1, x2)
-end
-x1, x2 = (-3., 6), (-$\pi$, 0)
-seed = encode.([x1, x2], d)
-nsga(100, 50, ()->bitrand(d.nbbitstotal), z, seed=seed)
+rc = RealCoding(5, [-4, -4], [6, 6]) #Codes two reals -4 <= x <= 6 with a precision of 5 decimal places
+nsga(100, 50, z, rc, seed=[(-3., 6), (2.5, 0)])
+#Note that the initilisation function is not needed anymore, a random sequence of bits with the appropriate length will be generated
+#although it can still be overwritten : nsga(100, 50, z, rc, init, ...)
+
+#The seed passed must be a phenotype here, it will automatically be encoded
 ```
 
 

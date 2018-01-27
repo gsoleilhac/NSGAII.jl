@@ -24,11 +24,9 @@ nsga(250, 100, m, fplot=plot_pop)
 solve(m, method=:dichotomy)
 
 Y_N = getY_N(m)
-for n = 1:length(Y_N)
-    X = getvalue(x, n)
-    print(find(X))
-    println("| z = ",Y_N[n])
-end
+
+seed = [getvalue(x, 1), getvalue(x, length(Y_N)), getvalue(x, length(Y_N)÷2)]
+nsga(250, 100, m, fplot=plot_pop, seed=seed)
 
 f1 = map(y -> y[1], Y_N)
 f2 = map(y -> y[2], Y_N)
@@ -36,6 +34,3 @@ xlabel("z1")
 ylabel("z2")
 plot(f1,f2,"bx", markersize = "6")
 !isinteractive() && show()
-
-seed = [getvalue(x, 1), getvalue(x, length(Y_N)), getvalue(x, length(Y_N)÷2)]
-nsga(250, 100, m, fplot=plot_pop, seed=seed)
