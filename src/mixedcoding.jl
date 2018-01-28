@@ -32,16 +32,16 @@ RealCoding(ϵ::Int, lb, ub) = MixedCoding(ϵ, fill(:Cont, length(lb)), lb, ub)
 function decode(x, d::MixedCoding)::Vector{Float64}
 
     res = zeros(d.nbvar)
+    j = 0
     for i = 1:d.nbvar
+        j += d.nbbits[i]
         if d.types[i] == :Bin
-            res[i] = x[sum(d.nbbits[1:i])]==1 ? 1. : 0.
+            res[i] = x[j]==1 ? 1. : 0.
         else
             val = zero(UInt128)
             puis = one(UInt128)
-            jstart = sum(d.nbbits[1:i])
-            jend = jstart - d.nbbits[i] + 1
-            for j = jstart:-1:jend
-                x[j] && (val += puis)
+            for ind = j:-1:j-d.nbbits[i]+1
+                x[ind] && (val += puis)
                 puis *= 2
             end
 

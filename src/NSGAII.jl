@@ -9,12 +9,16 @@ include("mutation.jl")
 include("mixedcoding.jl")
 
 
-function nsga(popSize::Integer, nbGen::Integer, z::Function, init::Function ; fdecode=identity, fCV = x->0., pmut= 0.05, fmut=default_mutation!, fcross = default_crossover, seed=typeof(init())[], fplot = (x)->nothing)
-    _nsga(popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot)
+function nsga(popSize::Integer, nbGen::Integer, z::Function, init::Function ; 
+    fdecode=identity, fCV = x->0., pmut= 0.05, fmut=default_mutation!, 
+    fcross = default_crossover, seed=typeof(init())[], fplot = (x)->nothing)
+    return _nsga(popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot)
 end
 
-function nsga(popSize::Integer, nbGen::Integer, z::Function, mc::MixedCoding, init::Function=()->bitrand(mc.nbbitstotal); fCV = x->0., pmut= 0.05, fmut=default_mutation!, fcross = default_crossover, seed=Vector{Float64}[], fplot = (x)->nothing)
-    _nsga(popSize, nbGen, init, z, x->decode(x, mc), fCV , pmut, fmut, fcross, encode.(seed, mc), fplot)
+function nsga(popSize::Integer, nbGen::Integer, z::Function, mc::MixedCoding, init::Function=()->bitrand(mc.nbbitstotal); 
+    fCV = x->0., pmut= 0.05, fmut=default_mutation!, fcross = default_crossover, 
+    seed=Vector{Float64}[], fplot = (x)->nothing)
+    return _nsga(popSize, nbGen, init, z, x->decode(x, mc), fCV , pmut, fmut, fcross, encode.(seed, mc), fplot)
 end
 
 
@@ -79,7 +83,12 @@ function nsga(popSize, nbGen, m, ϵ = 5; kwargs...)
     end
 
     let mc=mc, vd=vd, z=z, CV=CV
-        res = nsga(popSize, nbGen, z, mc ; fCV = CV, kwargs...)
+
+        if all(x->x==:Bin, m.colCat)
+            res = nsga(popSize, nbGen, z, ()->bitrand(m.numCols) ; fCV = CV, kwargs...)
+        else
+            res = nsga(popSize, nbGen, z, mc ; fCV = CV, kwargs...)
+        end
 
         for i = 1:length(vd.objs)
             if vd.objSenses[i] == :Max
