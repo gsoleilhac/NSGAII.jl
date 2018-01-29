@@ -51,22 +51,22 @@ end
 
 println()
 println("Meilleur individu sur le premier objectif")
-x1 = sort(res, by = x -> x[2][1])[end];
-println("x = $(x1[1][1:5]) , δ = $(x1[1][6:8])")
-println("z = $(x1[2])")
-println("CV : $(x1[3])")
+x1 = sort(res, by = ind -> ind.y[1])[end];
+println("x = $(x1.pheno[1:5]) , δ = $(x1.pheno[6:8])")
+println("z = $(x1.y)")
+println("CV : $(x1.CV)")
 
 println("Meilleur individu sur le deuxième objectif")
-x2 = sort(res, by = x -> x[2][2])[end];
-println("x = $(x2[1][1:5]) , δ = $(x2[1][6:8])")
-println("z = $(x2[2])")
-println("CV : $(x2[3])")
+x2 = sort(res, by = ind -> ind.y[2])[end];
+println("x = $(x2.pheno[1:5]) , δ = $(x2.pheno[6:8])")
+println("z = $(x2.y)")
+println("CV : $(x2.CV)")
 
 println("Meilleur individu sur le troisième objectif")
-x3 = sort(res, by = x -> x[2][3])[end];
-println("x = $(x3[1][1:5]) , δ = $(x3[1][6:8])")
-println("z = $(x3[2])")
-println("CV : $(x3[3])")
+x3 = sort(res, by = ind -> ind.y[3])[end];
+println("x = $(x3.pheno[1:5]) , δ = $(x3.pheno[6:8])")
+println("z = $(x3.y)")
+println("CV : $(x3.CV)")
 
 
 
@@ -79,19 +79,19 @@ res = nsga(500, 50, m, fplot=plot_pop, seed=seed);
 
 println()
 println("Meilleur individu sur le premier objectif")
-x1 = sort(res, by = x -> x[2][1])[end];
-println("x = $(x1[1][1:5]) , δ = $(x1[1][6:8])")
-println("z = $(x1[2])")
-println("CV : $(x1[3])")
+x1 = sort(res, by = ind -> ind.y[1])[end];
+println("x = $(x1.pheno[1:5]) , δ = $(x1.pheno[6:8])")
+println("z = $(x1.y)")
+println("CV : $(x1.CV)")
 
 println("Meilleur individu sur le deuxième objectif")
-x2 = sort(res, by = x -> x[2][2])[end];
-println("x = $(x2[1][1:5]) , δ = $(x2[1][6:8])")
-println("z = $(x2[2])")
-println("CV : $(x2[3])")
+x2 = sort(res, by = ind -> ind.y[2])[end];
+println("x = $(x2.pheno[1:5]) , δ = $(x2.pheno[6:8])")
+println("z = $(x2.y)")
+println("CV : $(x2.CV)")
 
 println("Meilleur individu sur le troisième objectif")
-x3 = sort(res, by = x -> x[2][3])[end];
-println("x = $(x3[1][1:5]) , δ = $(x3[1][6:8])")
-println("z = $(x3[2])")
-println("CV : $(x3[3])")
+x3 = sort(res, by = ind -> ind.y[3])[end];
+println("x = $(x3.pheno[1:5]) , δ = $(x3.pheno[6:8])")
+println("z = $(x3.y)")
+println("CV : $(x3.CV)")

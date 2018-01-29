@@ -50,6 +50,7 @@ end
 
 function fast_non_dominated_sort!(pop::Vector{T}) where {T}
     F = T[]
+
     for p in pop
         empty!(p.dom_list)
         p.dom_count = 0
@@ -98,7 +99,7 @@ function crowding_distance_assignement!(pop::Vector{indiv{X,G,N,Y}}) where {X,G,
     for ind in pop
         ind.crowding = 0.
     end
-    for j = 1:length(pop[1].y) # Foreach objective
+    @inbounds for j = 1:N # Foreach objective
         let j = j #https://github.com/JuliaLang/julia/issues/15276
             sort!(pop, by = x-> x.y[j]) #sort by the objective value
         end

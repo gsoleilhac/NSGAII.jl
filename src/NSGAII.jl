@@ -1,6 +1,6 @@
 module NSGAII
 export nsga, MixedCoding, RealCoding
-using ProgressMeter, Requires
+using ProgressMeter, Requires, StaticArrays
 
 include("indivs.jl")
 include("functions.jl")
@@ -22,18 +22,27 @@ function nsga(popSize::Integer, nbGen::Integer, z::Function, mc::MixedCoding, in
 end
 
 
-@require vOptGeneric begin
 function nsga(popSize, nbGen, m, ϵ = 5; kwargs...)
-
     vd = m.ext[:vOpt]
     @assert all(isfinite, m.colLower) "All variables must be bounded"
     @assert all(isfinite, m.colUpper) "All variables must be bounded"
-    
+    objs = SVector(vd.objs...)
+    _nsga(popSize, nbGen, m, vd, objs, ϵ ; kwargs...)
+end
+
+function _nsga(popSize, nbGen, m, vd, objs::SVector{N, T}, ϵ = 5; kwargs...) where {N, T}
+
     mc = MixedCoding(ϵ, m.colCat, m.colLower, m.colUpper)
-
-    evaluate(obj, x) = dot(obj.aff.coeffs, x[map(v-> getfield(v, :col), obj.aff.vars)]) + obj.aff.constant
-
-    z(x) = ((evaluate(obj, x) for obj in vd.objs)...)
+   
+    evaluate(obj, x)::Float64 = evaluate(obj.aff.constant, obj.aff.coeffs, map(x->getfield(x, :col), obj.aff.vars), x)
+    function evaluate(cst, coeffs, vars, x)::Float64
+        res = cst
+        for i = 1:length(coeffs)
+            res += coeffs[i] * x[vars[i]]
+        end
+        res
+    end
+    z(x)::SVector{N, Float64} = map(obj->evaluate(obj, x), objs) .* SVector{N}(map(s -> s == :Max ? -1 : 1, vd.objSenses))
 
     function CV(x)
         res = 0.
@@ -96,16 +105,16 @@ function nsga(popSize, nbGen, m, ϵ = 5; kwargs...)
             end
         end
 
-        signs = Tuple(s == :Min ? 1 : -1 for s in vd.objSenses)
+        signs = SVector{N}([s == :Min ? 1 : -1 for s in vd.objSenses])
 
         for indiv in res
             indiv.y = indiv.y .* signs
         end
 
-        [(ind.pheno, ind.y, ind.CV) for ind in res]
+        res
+        # [(ind.pheno, ind.y, ind.CV) for ind in res]
 
     end
-end
 end
 
 end # module

@@ -21,7 +21,7 @@ function plot_pop(P)
     sleep(0.1)
 end
 
-nsga(1000, 50, m, fplot=plot_pop)
+nsga(200, 50, m, fplot=plot_pop)
 
 solve(m, method=:dichotomy)
 
