@@ -3,7 +3,7 @@ export nsga, MixedCoding, RealCoding
 using ProgressMeter, StaticArrays, Compat, Compat.Random
 
 if VERSION >= v"0.7-"
-    digits(T,n,base,pad) = digits(T, n, base=base, pad=pad)
+    Base.digits(T,n,base,pad) = digits(T, n, base=base, pad=pad)
 end
 
 include("indivs.jl")
