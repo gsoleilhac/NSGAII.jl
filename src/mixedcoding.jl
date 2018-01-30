@@ -56,7 +56,7 @@ function decode(x, d::MixedCoding)::Vector{Float64}
 end
 
 function encode(x, d::MixedCoding)::BitVector
-    res = BitVector(0)
+    res = BitVector()
     sizehint!(res, d.nbbitstotal)
     for i = 1:d.nbvar
         if d.types[i] == :Int

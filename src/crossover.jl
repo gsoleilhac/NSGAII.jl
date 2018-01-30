@@ -27,17 +27,17 @@ function PMX_crossover(pa, pb)
 
     for i = cut_a:cut_b
         if pa[i] ∉ pb[cut_a:cut_b]
-            j = findfirst(pa, pb[i])
+            j = findfirst(equalto(pb[i]), pa)
             while j ∈ cut_a:cut_b
-                j = findfirst(pa, pb[j])
+                j = findfirst(equalto(pb[j]), pa)
             end
             cb[j] = pa[i]
         end
 
         if pb[i] ∉ pa[cut_a:cut_b]
-            j = findfirst(pb, pa[i])
+            j = findfirst(equalto(pa[i]), pb)
             while j ∈ cut_a:cut_b
-                j = findfirst(pb, pa[j])
+                j = findfirst(equalto(pa[j]), pb)
             end
             ca[j] = pb[i]
         end

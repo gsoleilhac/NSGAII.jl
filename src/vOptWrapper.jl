@@ -22,7 +22,7 @@ function _nsga(popSize, nbGen, m, vd, objs::SVector{N, T}, ϵ = 5; kwargs...) wh
     z(x)::SVector{N, Float64} = map(obj->evaluate(obj, x), objs) .* SVector{N}(map(s -> s == :Max ? -1 : 1, vd.objSenses))
 
     function CV(x)
-        res = 0.
+        res::Float64 = 0.
         for CSTR in m.linconstr
 
             if CSTR.lb != -Inf && CSTR.lb != typemin(Float64) 
