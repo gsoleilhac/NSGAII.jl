@@ -1,5 +1,5 @@
 using NSGAII
-using Compat.Test
+using Compat.Test, Compat.Random
 
 
 const C1 = [2 5 4 7 ; 3 3 5 7 ; 3 8 4 2 ; 6 5 2 5]
