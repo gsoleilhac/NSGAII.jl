@@ -3,27 +3,27 @@ function nsga(popSize, nbGen, m, ϵ = 5; kwargs...)
     vd = m.ext[:vOpt]
     @assert all(isfinite, m.colLower) "All variables must be bounded"
     @assert all(isfinite, m.colUpper) "All variables must be bounded"
-    objs = SVector(vd.objs...)
-    _nsga(popSize, nbGen, m, vd, objs, ϵ ; kwargs...)
+    objs_triplets = SVector(((obj.aff.constant, obj.aff.coeffs, map(x->getfield(x, :col), obj.aff.vars)) for obj in vd.objs)...)
+    objSenses = SVector(map(s -> s == :Max ? -1 : 1, vd.objSenses)...)
+    _nsga(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_triplets, ϵ ; kwargs...)
 end
 
-function _nsga(popSize, nbGen, m, vd, objs::SVector{N, T}, ϵ = 5; kwargs...) where {N, T}
+function _nsga(popSize, nbGen, m, vd, linconstr, objSenses, objs_triplets::SVector{N, T}, ϵ = 5; kwargs...) where {N, T}
 
     mc = MixedCoding(ϵ, m.colCat, m.colLower, m.colUpper)
    
-    evaluate(obj, x)::Float64 = evaluate(obj.aff.constant, obj.aff.coeffs, map(x->getfield(x, :col), obj.aff.vars), x)
     function evaluate(cst, coeffs, vars, x)::Float64
         res = cst
         for i = 1:length(coeffs)
-            res += coeffs[i] * x[vars[i]]
+            @inbounds res += coeffs[i] * x[vars[i]]
         end
         res
     end
-    z(x)::SVector{N, Float64} = map(obj->evaluate(obj, x), objs) .* SVector{N}(map(s -> s == :Max ? -1 : 1, vd.objSenses))
+    z(x)::SVector{N, Float64} = objSenses .* map(obj_t->evaluate(obj_t..., x), objs_triplets)
 
     function CV(x)
         res::Float64 = 0.
-        for CSTR in m.linconstr
+        @inbounds for CSTR in linconstr
 
             if CSTR.lb != -Inf && CSTR.lb != typemin(Float64) 
                 if CSTR.lb == 0
@@ -70,10 +70,8 @@ function _nsga(popSize, nbGen, m, vd, objs::SVector{N, T}, ϵ = 5; kwargs...) wh
             res = nsga(popSize, nbGen, z, mc ; fCV = CV, kwargs...)
         end
 
-        signs = SVector{N}([s == :Min ? 1 : -1 for s in vd.objSenses])
-
         for indiv in res
-            indiv.y = indiv.y .* signs
+            indiv.y = indiv.y .* objSenses
         end
 
         res

@@ -4,7 +4,7 @@ function rand_flip!(bits)
     nb = length(bits)
     for i = 1:nb
         if rand() < 1/nb
-            bits[i] = 1 - bits[i]
+            @inbounds bits[i] = 1 - bits[i]
         end
     end
 end
@@ -15,7 +15,7 @@ function rand_swap!(perm::Vector{Int})
     while j == i
         j = rand(1:length(perm))
     end
-    perm[i], perm[j] = perm[j], perm[i]
+    @inbounds perm[i], perm[j] = perm[j], perm[i]
 end
 default_mutation!(p::Vector{Int}) = rand_swap!(p)
 
