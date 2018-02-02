@@ -3,11 +3,11 @@ mutable struct indiv{G, P, N, Y<:Number}#Genotype, Phenotype, Dimension(Y_N), Ty
     pheno::P
     y::SVector{N, Y}
     CV::Float64
-    rank::Int
+    rank::UInt16
     crowding::Float64
-    dom_count::Int
-    dom_list::Vector{indiv{G,P,N,Y}}
-    indiv(x::G, pheno::P, y::SVector{N, Y}, cv) where {G,P,N,Y} = new{G, P, N, Y}(x, pheno, y, cv, 0, 0., 0, indiv{G,P,N,Y}[])
+    dom_count::UInt16
+    dom_list::Vector{UInt16}
+    indiv(x::G, pheno::P, y::SVector{N, Y}, cv) where {G,P,N,Y} = new{G, P, N, Y}(x, pheno, y, cv, 0, 0., 0, [])
     indiv(x::G, pheno::P, y::NTuple{N, Y}, cv) where {G,P,N,Y} = indiv(x, pheno, SVector(y...), cv)
 end
 function indiv(x, fdecode::Function, z::Function, fCV::Function)

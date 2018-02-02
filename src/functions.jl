@@ -36,11 +36,10 @@ function _nsga(popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed,
             i += 1
         end
         if length(P) != popSize
+            n = popSize - length(P)
             crowding_distance_assignement!(F[i])
-            sort!(F[i], by = x -> x.crowding)
-            while length(P) < popSize
-                push!(P, pop!(F[i]))
-            end
+            sort!(F[i], by = x -> x.crowding, rev=true, alg=PartialQuickSort(n))
+            append!(P, F[i][1:n])
         end
 
         fplot(P)
@@ -50,20 +49,26 @@ end
 
 function fast_non_dominated_sort!(pop::Vector{T}) where {T}
     F = T[]
+    n = length(pop)
 
     for p in pop
         empty!(p.dom_list)
         p.dom_count = 0
-        for q in pop
-            if p ⋖ q
-                push!(p.dom_list, q)
-            elseif q ⋖ p
-                p.dom_count += 1
+    end
+
+    for i in 1:n
+        for j in i+1:n
+            if pop[i] ⋖ pop[j]
+                push!(pop[i].dom_list, j)
+                pop[j].dom_count += 1
+            elseif pop[j] ⋖ pop[i]
+                push!(pop[j].dom_list, i)
+                pop[i].dom_count += 1
             end
         end
-        if p.dom_count == 0
-            p.rank = 1
-            push!(F, p)
+        if pop[i].dom_count == 0
+            pop[i].rank = 1
+            push!(F, pop[i])
         end
     end
     res = Vector{T}[]
@@ -72,10 +77,10 @@ function fast_non_dominated_sort!(pop::Vector{T}) where {T}
         Q = T[]
         for p in F
             for q in p.dom_list
-                q.dom_count -= 1
-                if q.dom_count == 0
-                    q.rank = i
-                    push!(Q, q)
+                pop[q].dom_count -= 1
+                if pop[q].dom_count == 0
+                    pop[q].rank = i
+                    push!(Q, pop[q])
                 end
             end
         end
