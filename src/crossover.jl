@@ -1,29 +1,47 @@
-function crossover(ind_a, ind_b, fcross)
-    c1, c2 = fcross(ind_a.x, ind_b.x)
-    return indiv(c1, ind_a.pheno, ind_a.y, 0.), indiv(c2, ind_a.pheno, ind_a.y, 0.) #phenotypes, objective value and CV value will be calculated later, after mutation
+function crossover!(ind_a, ind_b, fcross, child_a, child_b)
+    fcross(ind_a.x, ind_b.x, child_a.x, child_b.x)
 end
 
-function two_point_crossover(bits_a, bits_b)
+function two_point_crossover!(bits_a, bits_b, child1, child2)
     cut_a = cut_b = rand(2:length(bits_a)-1)
     while(cut_b == cut_a)
         cut_b = rand(2:length(bits_a))
     end
     cut_a,cut_b = minmax(cut_b,cut_a)
-    @inbounds child1 = vcat(vcat(bits_a[1:cut_a-1], bits_b[cut_a:cut_b]), bits_a[cut_b+1:end])
-    @inbounds child2 = vcat(vcat(bits_b[1:cut_a-1], bits_a[cut_a:cut_b]), bits_b[cut_b+1:end])
-    child1, child2
-end
-(default_crossover(ba::T, bb::T)) where T<:AbstractVector{Bool} = two_point_crossover(ba, bb)
 
-function PMX_crossover(pa, pb)
+    copyto!(child1, 1, bits_a, 1, cut_a-1)
+    copyto!(child1, cut_a, bits_b, cut_a, cut_b-cut_a+1)
+    copyto!(child1, cut_b+1, bits_a, cut_b+1, length(bits_a)-cut_b)
+
+    copyto!(child2, 1, bits_b, 1, cut_a-1)
+    copyto!(child2, cut_a, bits_a, cut_a, cut_b-cut_a+1)
+    copyto!(child2, cut_b+1, bits_b, cut_b+1, length(bits_a)-cut_b)
+end
+(default_crossover!(pa::T, pb::T, ca, cb)) where T<:AbstractVector{Bool} = two_point_crossover!(pa, pb, ca, cb)
+
+function PMX_crossover!(pa, pb, ca, cb)
     cut_a = cut_b = rand(1:length(pa))
     while(cut_b == cut_a)
         cut_b = rand(1:length(pa))
     end
     cut_a, cut_b = minmax(cut_a, cut_b)
-    ca, cb = copy(pb), copy(pa)
-    @inbounds ca[cut_a:cut_b] .= pa[cut_a:cut_b]
-    @inbounds cb[cut_a:cut_b] .= pb[cut_a:cut_b]
+
+
+
+    copyto!(ca, 1, pb, 1, cut_a-1)
+    copyto!(ca, cut_a, pa, cut_a, cut_b-cut_a+1)
+    copyto!(ca, cut_b+1, pb, cut_b+1, length(pa)-cut_b)
+
+    copyto!(cb, 1, pa, 1, cut_a-1)
+    copyto!(cb, cut_a, pb, cut_a, cut_b-cut_a+1)
+    copyto!(cb, cut_b+1, pa, cut_b+1, length(pa)-cut_b)
+
+
+    # copy!(ca, pb)
+    # copy!(cb, pa)
+    
+    # @inbounds ca[cut_a:cut_b] .= pa[cut_a:cut_b]
+    # @inbounds cb[cut_a:cut_b] .= pb[cut_a:cut_b]
 
     @inbounds for i = cut_a:cut_b
         if pa[i] ∉ pb[cut_a:cut_b]
@@ -42,6 +60,5 @@ function PMX_crossover(pa, pb)
             ca[j] = pb[i]
         end
     end
-    ca, cb
 end
-(default_crossover(ba::T, bb::T)) where T<:AbstractVector{Int} = PMX_crossover(ba, bb)
+(default_crossover!(pa::T, pb::T, ca, cb)) where T<:AbstractVector{Int} = PMX_crossover!(pa, pb, ca, cb)

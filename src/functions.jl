@@ -1,53 +1,52 @@
-function _nsga(popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot)
+function _nsga(::Type{X}, popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot) where X
 
-    X = typeof(init())
-    P = [indiv(init(), fdecode, z, fCV) for _=1:popSize-length(seed)]
-    append!(P, indiv.(convert.(X, seed), fdecode, z, fCV))
-    fast_non_dominated_sort!(P)
-    Q = similar(P)
+    P::Vector{X} = Vector{X}(uninitialized, 2*popSize)
+    P[1:popSize-length(seed)] .= [indiv(init(), fdecode, z, fCV)::X for _=1:popSize-length(seed)]
+    for i = 1:length(seed)
+        P[popSize-length(seed)+i] = indiv(seed[i], fdecode, z, fCV)
+    end
+    for i=1:popSize
+        P[popSize+i] = deepcopy(P[i])
+    end
+    fast_non_dominated_sort!(view(P, 1:popSize))
 
     @showprogress 0.1 for gen = 1:nbGen
         
-        for i = 1:popSize
-            pa = tournament_selection(P)
-            pb = tournament_selection(P)
-            ca,cb = crossover(pa, pb, fcross)
+        for i = 1:2:popSize
+            pa = tournament_selection(view(P, 1:popSize))
+            pb = tournament_selection(view(P, 1:popSize))
 
-            rand() < pmut && mutate!(ca, fmut)
-            rand() < pmut && mutate!(cb, fmut)
+            crossover!(pa, pb, fcross, P[popSize+i], P[popSize+i+1])
 
-            eval!(ca, fdecode, z, fCV)
-            eval!(cb, fdecode, z, fCV)
+            rand() < pmut && mutate!(P[popSize+i], fmut)
+            rand() < pmut && mutate!(P[popSize+i+1], fmut)
 
-            if ca ⋖ cb
-                Q[i] = ca
-            elseif cb ⋖ ca
-                Q[i] = cb
-            else
-                Q[i] = ifelse(rand(Bool), ca, cb)
+            eval!(P[popSize+i], fdecode, z, fCV)
+            eval!(P[popSize+i+1], fdecode, z, fCV)
+        end
+
+        fast_non_dominated_sort!(P)
+        sort!(P, by = x->x.rank)
+        
+        let f::Int = 1
+            ind = 0
+            indnext = findlast(x->x.rank==f, P)
+            while 0 < indnext <= popSize
+                ind = indnext
+                f += 1
+                indnext = findlast(x->x.rank==f, P)
             end
-        end
-
-        F = fast_non_dominated_sort!(vcat(P, Q))
-        i = 1
-        empty!(P)
-        while length(P) + length(F[i]) <= popSize
-            append!(P, F[i])
-            i += 1
-        end
-        if length(P) != popSize
-            n = popSize - length(P)
-            crowding_distance_assignement!(F[i])
-            sort!(F[i], by = x -> x.crowding, rev=true, alg=PartialQuickSort(n))
-            append!(P, F[i][1:n])
+            indnext == 0 && (indnext = length(P))
+            crowding_distance_assignement!(view(P, ind+1:indnext))
+            sort!(view(P, ind+1:indnext), by = x -> x.crowding, rev=true, alg=PartialQuickSort(popSize-ind))
         end
 
         fplot(P)
     end
-    P
+    filter(x->x.rank==1, P)
 end
 
-function fast_non_dominated_sort!(pop::Vector{T}) where {T}
+function fast_non_dominated_sort!(pop::AbstractVector{T}) where {T}
     F = T[]
     n = length(pop)
 
@@ -91,7 +90,7 @@ function fast_non_dominated_sort!(pop::Vector{T}) where {T}
     res
 end
 
-function crowding_distance_assignement!(pop::Vector{indiv{X,G,2,Y}}) where {X, G, Y}
+function crowding_distance_assignement!(pop::AbstractVector{indiv{X,G,2,Y}}) where {X, G, Y}
     sort!(pop, by = x-> x.y[1])
     pop[1].crowding = pop[end].crowding = Inf
     for i = 2:length(pop)-1
@@ -100,7 +99,7 @@ function crowding_distance_assignement!(pop::Vector{indiv{X,G,2,Y}}) where {X, G
     end
 end
 
-function crowding_distance_assignement!(pop::Vector{indiv{X,G,N,Y}}) where {X,G,N,Y}
+function crowding_distance_assignement!(pop::AbstractVector{indiv{X,G,N,Y}}) where {X,G,N,Y}
     for ind in pop
         ind.crowding = 0.
     end

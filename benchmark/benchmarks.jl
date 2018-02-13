@@ -10,13 +10,15 @@ using vOptGeneric, vOptSpecific
 	const C3 = [4 2 5 3 ; 5 3 4 3 ; 4 3 5 2 ; 6 4 7 3]
 	z(x, C) = sum(inds->C[inds...], enumerate(x))
 	z(x::Vector{Int}) = z(x, C1), z(x, C2), z(x, C3)
-	@bench "randperm" nsga(1000, 100, z, ()->randperm(4))
+	nsga(1000, 20, z, ()->randperm(4))
+	@bench "randperm" nsga(1000, 200, z, ()->randperm(4))
 
 
 	const d = RealCoding(6, [-10], [10])
 	z(x) = x[1]^2, (x[1] - 2)^2
 	seed = [-10 + rand()*20 for _ =1:100]
-	@bench "realcoding" nsga(1000, 100, z, d, seed = seed)
+	nsga(1000, 20, z, d, seed = seed)
+	@bench "realcoding" nsga(1000, 200, z, d, seed = seed)
 
 end
 
@@ -30,7 +32,8 @@ end
 	@addobjective(m, Max, dot(x, p1))
 	@addobjective(m, Max, dot(x, p2))
 	@constraint(m, dot(x, w) <= c)
-	@bench "Bi01KP" nsga(1000, 100, m)
+	nsga(1000, 20, m)
+	@bench "Bi01KP" nsga(1000, 200, m)
 
 	m = vModel()
 	@variable(m, 0 <=x[1:5] <= 10)
@@ -44,6 +47,7 @@ end
 	@constraint(m, 7x[4] + 9x[5] + 19δ[3] <= 66)
 	@constraint(m, 16x[1] + 20x[5] <= 86)
 	@constraint(m, 13x[2] + 7x[4] <= 86)
-	@bench "Mavrota" res = nsga(1000, 100, m)
+	nsga(1000, 20, m)
+	@bench "Mavrota" nsga(1000, 200, m)
 
 end
