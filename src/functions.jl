@@ -1,16 +1,16 @@
-function _nsga(::Type{X}, popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot) where X
+function _nsga(::Type{indiv{G,Ph,N,Y}}, popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot) where {G,Ph,N,Y}
 
-    P::Vector{X} = Vector{X}(uninitialized, 2*popSize)
-    P[1:popSize-length(seed)] .= [indiv(init(), fdecode, z, fCV)::X for _=1:popSize-length(seed)]
+    P::Vector{indiv{G,Ph,N,Y}} = Vector{indiv{G,Ph,N,Y}}(uninitialized, 2*popSize)
+    P[1:popSize-length(seed)] .= [indiv(init(), fdecode, z, fCV) for _=1:popSize-length(seed)]
     for i = 1:length(seed)
-        P[popSize-length(seed)+i] = indiv(seed[i], fdecode, z, fCV)
+        P[popSize-length(seed)+i] = indiv(convert(G, seed[i]), fdecode, z, fCV)
     end
     for i=1:popSize
         P[popSize+i] = deepcopy(P[i])
     end
     fast_non_dominated_sort!(view(P, 1:popSize))
 
-    @showprogress 0.1 for gen = 1:nbGen
+    @showprogress 0.2 for gen = 1:nbGen
         
         for i = 1:2:popSize
             pa = tournament_selection(view(P, 1:popSize))
@@ -26,7 +26,7 @@ function _nsga(::Type{X}, popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fc
         end
 
         fast_non_dominated_sort!(P)
-        sort!(P, by = x->x.rank)
+        sort!(P, by = x->x.rank, alg=Base.Sort.QuickSort)
         
         let f::Int = 1
             ind = 0

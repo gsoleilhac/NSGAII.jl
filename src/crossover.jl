@@ -26,8 +26,6 @@ function PMX_crossover!(pa, pb, ca, cb)
     end
     cut_a, cut_b = minmax(cut_a, cut_b)
 
-
-
     copyto!(ca, 1, pb, 1, cut_a-1)
     copyto!(ca, cut_a, pa, cut_a, cut_b-cut_a+1)
     copyto!(ca, cut_b+1, pb, cut_b+1, length(pa)-cut_b)
@@ -35,13 +33,6 @@ function PMX_crossover!(pa, pb, ca, cb)
     copyto!(cb, 1, pa, 1, cut_a-1)
     copyto!(cb, cut_a, pb, cut_a, cut_b-cut_a+1)
     copyto!(cb, cut_b+1, pa, cut_b+1, length(pa)-cut_b)
-
-
-    # copy!(ca, pb)
-    # copy!(cb, pa)
-    
-    # @inbounds ca[cut_a:cut_b] .= pa[cut_a:cut_b]
-    # @inbounds cb[cut_a:cut_b] .= pb[cut_a:cut_b]
 
     @inbounds for i = cut_a:cut_b
         if pa[i] ∉ pb[cut_a:cut_b]
