@@ -12,7 +12,7 @@ mutable struct indiv{G, P, N, Y<:Number}#Genotype, Phenotype, Dimension(Y_N), Ty
 end
 function indiv(x, fdecode::Function, z::Function, fCV::Function)
     pheno = fdecode(x)
-    indiv(x, pheno, z(pheno), fCV(pheno))
+    indiv(x, pheno, promote(z(pheno)...), fCV(pheno))
 end
 
 function dominates(a::indiv, b::indiv)

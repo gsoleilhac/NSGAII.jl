@@ -1,5 +1,5 @@
 
-function nsga(popSize, nbGen, m, ϵ = 5; kwargs...)
+function nsga(popSize, nbGen, m, ϵ::Int = 5; kwargs...)
     vd = m.ext[:vOpt]
     @assert all(isfinite, m.colLower) "All variables must be bounded"
     @assert all(isfinite, m.colUpper) "All variables must be bounded"

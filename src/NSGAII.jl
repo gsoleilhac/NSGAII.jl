@@ -2,10 +2,6 @@ module NSGAII
 export nsga, MixedCoding, RealCoding
 using ProgressMeter, StaticArrays, Compat, Compat.Random
 
-if VERSION >= v"0.7-"
-    Base.digits(T,n,base,pad) = digits(T, n, base=base, pad=pad)
-end
-
 include("indivs.jl")
 include("functions.jl")
 include("crossover.jl")

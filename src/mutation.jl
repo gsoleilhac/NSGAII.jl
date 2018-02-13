@@ -1,5 +1,4 @@
 mutate!(ind::indiv, fmut!) = fmut!(ind.x)
-
 function rand_flip!(bits)
     nb = length(bits)
     for i = 1:nb

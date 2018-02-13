@@ -9,8 +9,8 @@ function two_point_crossover(bits_a, bits_b)
         cut_b = rand(2:length(bits_a))
     end
     cut_a,cut_b = minmax(cut_b,cut_a)
-    @inbounds child1 = vcat(bits_a[1:cut_a-1], bits_b[cut_a:cut_b], bits_a[cut_b+1:end])
-    @inbounds child2 = vcat(bits_b[1:cut_a-1], bits_a[cut_a:cut_b], bits_b[cut_b+1:end])
+    @inbounds child1 = vcat(vcat(bits_a[1:cut_a-1], bits_b[cut_a:cut_b]), bits_a[cut_b+1:end])
+    @inbounds child2 = vcat(vcat(bits_b[1:cut_a-1], bits_a[cut_a:cut_b]), bits_b[cut_b+1:end])
     child1, child2
 end
 (default_crossover(ba::T, bb::T)) where T<:AbstractVector{Bool} = two_point_crossover(ba, bb)
