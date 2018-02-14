@@ -1,4 +1,4 @@
-function _nsga(::Type{indiv{G,Ph,N,Y}}, popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot) where {G,Ph,N,Y}
+function _nsga(::Type{indiv{G,Ph,N,Y}}, sense, popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot) where {G,Ph,N,Y}
 
     P::Vector{indiv{G,Ph,N,Y}} = Vector{indiv{G,Ph,N,Y}}(uninitialized, 2*popSize)
     P[1:popSize-length(seed)] .= [indiv(init(), fdecode, z, fCV) for _=1:popSize-length(seed)]
@@ -8,7 +8,7 @@ function _nsga(::Type{indiv{G,Ph,N,Y}}, popSize, nbGen, init, z, fdecode, fCV , 
     for i=1:popSize
         P[popSize+i] = deepcopy(P[i])
     end
-    fast_non_dominated_sort!(view(P, 1:popSize))
+    fast_non_dominated_sort!(view(P, 1:popSize), sense)
 
     @showprogress 0.2 for gen = 1:nbGen
         
@@ -25,7 +25,7 @@ function _nsga(::Type{indiv{G,Ph,N,Y}}, popSize, nbGen, init, z, fdecode, fCV , 
             eval!(P[popSize+i+1], fdecode, z, fCV)
         end
 
-        fast_non_dominated_sort!(P)
+        fast_non_dominated_sort!(P, sense)
         sort!(P, by = x->x.rank, alg=Base.Sort.QuickSort)
         
         let f::Int = 1
@@ -46,7 +46,7 @@ function _nsga(::Type{indiv{G,Ph,N,Y}}, popSize, nbGen, init, z, fdecode, fCV , 
     filter(x->x.rank==1, P)
 end
 
-function fast_non_dominated_sort!(pop::AbstractVector{T}) where {T}
+function fast_non_dominated_sort!(pop::AbstractVector{T}, sense) where {T}
     F = T[]
     n = length(pop)
 
@@ -57,10 +57,10 @@ function fast_non_dominated_sort!(pop::AbstractVector{T}) where {T}
 
     for i in 1:n
         for j in i+1:n
-            if pop[i] ⋖ pop[j]
+            if dominates(sense, pop[i], pop[j])
                 push!(pop[i].dom_list, j)
                 pop[j].dom_count += 1
-            elseif pop[j] ⋖ pop[i]
+            elseif dominates(sense, pop[j], pop[i])
                 push!(pop[j].dom_list, i)
                 pop[i].dom_count += 1
             end

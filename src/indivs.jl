@@ -15,9 +15,11 @@ function indiv(x, fdecode::Function, z::Function, fCV::Function)
     indiv(x, pheno, promote(z(pheno)...), fCV(pheno))
 end
 
-function dominates(a::indiv, b::indiv)
-    a.CV != b.CV && return a.CV < b.CV
+struct Max end
+struct Min end
 
+function dominates(::Min, a::indiv, b::indiv)
+    a.CV != b.CV && return a.CV < b.CV
     res = false
     for i in eachindex(a.y)
         @inbounds a.y[i] > b.y[i] && return false
@@ -25,7 +27,16 @@ function dominates(a::indiv, b::indiv)
     end
     res
 end
-⋖(a::indiv, b::indiv) = dominates(a, b)
+
+function dominates(::Max, a::indiv, b::indiv)
+    a.CV != b.CV && return a.CV < b.CV
+    res = false
+    for i in eachindex(a.y)
+        @inbounds a.y[i] < b.y[i] && return false
+        @inbounds a.y[i] > b.y[i] && (res=true)
+    end
+    res
+end
 
 Base.:(==)(a::indiv, b::indiv) = a.x == b.x
 Base.hash(a::indiv) = hash(a.x)

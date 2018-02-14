@@ -7,7 +7,7 @@ function plot_pop(P)
     clf()
     feasible = filter(x -> x.CV == 0, P)
     unfeasible = filter(x -> x.CV > 0, P)
-    non_dom = NSGAII.fast_non_dominated_sort!(P)[1]
+    non_dom = filter(x ->x.rank == 1, P)
     feasible = setdiff(feasible, non_dom)
     p = plot3D(map(x -> x.y[1], feasible), map(x -> x.y[2], feasible), map(x -> x.y[3], feasible), "bo", markersize=1)
     p = plot3D(map(x -> x.y[1], unfeasible), map(x -> x.y[2], unfeasible), map(x -> x.y[3], unfeasible), "rx", markersize=3)

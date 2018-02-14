@@ -4,7 +4,11 @@ function nsga(popSize, nbGen, m, ϵ::Int = 5; kwargs...)
     @assert all(isfinite, m.colLower) "All variables must be bounded"
     @assert all(isfinite, m.colUpper) "All variables must be bounded"
     objs_triplets = SVector(((obj.aff.constant, obj.aff.coeffs, map(x->getfield(x, :col), obj.aff.vars)) for obj in vd.objs)...)
-    objSenses = SVector(map(s -> s == :Max ? -1 : 1, vd.objSenses)...)
+    if all(equalto(:Min), vd.objSenses) || all(equalto(:Max), vd.objSenses)
+        objSenses = SVector{length(vd.objs)}(fill(1, length(vd.objs)))
+    else
+        objSenses = SVector(map(s -> s == :Max ? -1 : 1, vd.objSenses)...)
+    end
     _nsga(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_triplets, ϵ ; kwargs...)
 end
 
@@ -19,6 +23,7 @@ function _nsga(popSize, nbGen, m, vd, linconstr, objSenses, objs_triplets::SVect
         end
         res
     end
+
     z(x)::SVector{N, Float64} = objSenses .* map(obj_t->evaluate(obj_t..., x), objs_triplets)
 
     function CV(x)
@@ -65,16 +70,24 @@ function _nsga(popSize, nbGen, m, vd, linconstr, objSenses, objs_triplets::SVect
     let mc=mc, vd=vd, z=z, CV=CV
 
         if all(x->x==:Bin, m.colCat)
-            res = nsga(popSize, nbGen, z, ()->bitrand(m.numCols) ; fCV = CV, kwargs...)
+            if all(equalto(:Max), vd.objSenses)
+                res = nsga_max(popSize, nbGen, z, ()->bitrand(m.numCols) ; fCV = CV, kwargs...)
+            else
+                res = nsga(popSize, nbGen, z, ()->bitrand(m.numCols) ; fCV = CV, kwargs...)
+            end
         else
-            res = nsga(popSize, nbGen, z, mc ; fCV = CV, kwargs...)
+            if all(equalto(:Max), vd.objSenses)
+                res = nsga_max(popSize, nbGen, z, mc ; fCV = CV, kwargs...)
+            else
+                res = nsga(popSize, nbGen, z, mc ; fCV = CV, kwargs...)
+            end
         end
 
-        for indiv in res
-            indiv.y = indiv.y .* objSenses
+        if !all(equalto(:Min), vd.objSenses) || !all(equalto(:Max), vd.objSenses)
+            for indiv in res
+                indiv.y = indiv.y .* objSenses
+            end
         end
-
-        res
-
+        return res
     end
 end

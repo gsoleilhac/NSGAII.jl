@@ -14,7 +14,7 @@ function plot_pop(P)
     ax = gca()
     ax[:set_xlim]([15800, 20570])
     ax[:set_ylim]([15630, 20877])
-    p = plot(map(x -> -x.y[1], P), map(x -> -x.y[2], P), "bo", markersize=1)
+    p = plot(map(x -> x.y[1], P), map(x -> x.y[2], P), "bo", markersize=1)
     !isinteractive() && show()
     sleep(0.1)
 end
