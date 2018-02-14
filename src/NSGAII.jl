@@ -13,32 +13,30 @@ include("vOptWrapper.jl")
 
 function nsga(popSize::Integer, nbGen::Integer, z::Function, init::Function ; 
     fdecode=identity, fCV = x->0., pmut= 0.05, fmut=default_mutation!, 
-    fcross = default_crossover!, seed=typeof(init())[], fplot = (x)->nothing)
+    fcross = default_crossover!, seed=typeof(init())[], fplot = (x)->nothing, plotevery=1)
 	X = typeof(indiv(init(), fdecode, z, fCV))
-    return _nsga(X, Min(), popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot)
+    return _nsga(X, Min(), popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot, plotevery)
 end
 
 function nsga(popSize::Integer, nbGen::Integer, z::Function, mc::MixedCoding, init::Function=()->bitrand(mc.nbbitstotal); 
     fCV = x->0., pmut= 0.05, fmut=default_mutation!, fcross = default_crossover!, 
-    seed=Vector{Float64}[], fplot = (x)->nothing)
+    seed=Vector{Float64}[], fplot = (x)->nothing, plotevery=1)
 	X = typeof(indiv(init(), x->decode(x, mc), z, fCV))
-	# @code_warntype _nsga(X, popSize, nbGen, init, z, x->decode(x, mc), fCV , pmut, fmut, fcross, encode.(seed, mc), fplot)
-    return _nsga(X, Min(), popSize, nbGen, init, z, x->decode(x, mc), fCV , pmut, fmut, fcross, encode.(seed, mc), fplot)
+    return _nsga(X, Min(), popSize, nbGen, init, z, x->decode(x, mc), fCV , pmut, fmut, fcross, encode.(seed, mc), fplot, plotevery)
 end
 
 function nsga_max(popSize::Integer, nbGen::Integer, z::Function, init::Function ; 
     fdecode=identity, fCV = x->0., pmut= 0.05, fmut=default_mutation!, 
-    fcross = default_crossover!, seed=typeof(init())[], fplot = (x)->nothing)
+    fcross = default_crossover!, seed=typeof(init())[], fplot = (x)->nothing, plotevery=1)
 	X = typeof(indiv(init(), fdecode, z, fCV))
-    return _nsga(X, Max(), popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot)
+    return _nsga(X, Max(), popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot, plotevery)
 end
 
 function nsga_max(popSize::Integer, nbGen::Integer, z::Function, mc::MixedCoding, init::Function=()->bitrand(mc.nbbitstotal); 
     fCV = x->0., pmut= 0.05, fmut=default_mutation!, fcross = default_crossover!, 
-    seed=Vector{Float64}[], fplot = (x)->nothing)
+    seed=Vector{Float64}[], fplot = (x)->nothing, plotevery=1)
 	X = typeof(indiv(init(), x->decode(x, mc), z, fCV))
-	# @code_warntype _nsga(X, popSize, nbGen, init, z, x->decode(x, mc), fCV , pmut, fmut, fcross, encode.(seed, mc), fplot)
-    return _nsga(X, Max(), popSize, nbGen, init, z, x->decode(x, mc), fCV , pmut, fmut, fcross, encode.(seed, mc), fplot)
+    return _nsga(X, Max(), popSize, nbGen, init, z, x->decode(x, mc), fCV , pmut, fmut, fcross, encode.(seed, mc), fplot, plotevery)
 end
 
 end # module

@@ -1,4 +1,4 @@
-function _nsga(::Type{indiv{G,Ph,N,Y}}, sense, popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot) where {G,Ph,N,Y}
+function _nsga(::Type{indiv{G,Ph,N,Y}}, sense, popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot, plotevery) where {G,Ph,N,Y}
 
     P::Vector{indiv{G,Ph,N,Y}} = Vector{indiv{G,Ph,N,Y}}(uninitialized, 2*popSize)
     P[1:popSize-length(seed)] .= [indiv(init(), fdecode, z, fCV) for _=1:popSize-length(seed)]
@@ -41,8 +41,9 @@ function _nsga(::Type{indiv{G,Ph,N,Y}}, sense, popSize, nbGen, init, z, fdecode,
             sort!(view(P, ind+1:indnext), by = x -> x.crowding, rev=true, alg=PartialQuickSort(popSize-ind))
         end
 
-        fplot(P)
+        gen % plotevery == 1 && fplot(P)
     end
+    fplot(P)
     filter(x->x.rank==1, P)
 end
 
