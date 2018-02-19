@@ -41,7 +41,7 @@ function _nsga(::Type{indiv{G,Ph,N,Y}}, sense, popSize, nbGen, init, z, fdecode,
             sort!(view(P, ind+1:indnext), by = x -> x.crowding, rev=true, alg=PartialQuickSort(popSize-ind))
         end
 
-        gen % plotevery == 1 && fplot(P)
+        gen % plotevery == 0 && fplot(P)
     end
     fplot(P)
     filter(x->x.rank==1, P)

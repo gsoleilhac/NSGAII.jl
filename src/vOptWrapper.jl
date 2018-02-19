@@ -1,4 +1,18 @@
 
+function nsga(::Val{N}, popSize, nbGen, m, ϵ::Int = 5; kwargs...)::Vector{indiv{BitVector, Vector{Float64}, N, Float64}} where N
+    vd = m.ext[:vOpt]
+    @assert all(isfinite, m.colLower) "All variables must be bounded"
+    @assert all(isfinite, m.colUpper) "All variables must be bounded"
+    triplet = Tuple{Float64, Vector{Float64}, Vector{Int}}
+    objs_triplets = SVector{N, triplet}([(obj.aff.constant, obj.aff.coeffs, map(x->getfield(x, :col), obj.aff.vars)) for obj in vd.objs])
+    if all(equalto(:Min), vd.objSenses) || all(equalto(:Max), vd.objSenses)
+        objSenses = SVector{N, Int}(fill(1, length(vd.objs)))
+    else
+        objSenses = SVector{N, Int}(map(s -> s == :Max ? -1 : 1, vd.objSenses)...)
+    end
+    _nsga(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_triplets, ϵ ; kwargs...)
+end
+
 function nsga(popSize, nbGen, m, ϵ::Int = 5; kwargs...)
     vd = m.ext[:vOpt]
     @assert all(isfinite, m.colLower) "All variables must be bounded"
@@ -12,7 +26,7 @@ function nsga(popSize, nbGen, m, ϵ::Int = 5; kwargs...)
     _nsga(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_triplets, ϵ ; kwargs...)
 end
 
-function _nsga(popSize, nbGen, m, vd, linconstr, objSenses, objs_triplets::SVector{N, T}, ϵ = 5; kwargs...) where {N, T}
+function _nsga(popSize, nbGen, m, vd, linconstr, objSenses, objs_triplets::SVector{N, T}, ϵ = 5; kwargs...)::Vector{indiv{BitVector, Vector{Float64}, N, Float64}} where {N, T}
 
     mc = MixedCoding(ϵ, m.colCat, m.colLower, m.colUpper)
    
@@ -69,18 +83,10 @@ function _nsga(popSize, nbGen, m, vd, linconstr, objSenses, objs_triplets::SVect
 
     let mc=mc, vd=vd, z=z, CV=CV
 
-        if all(x->x==:Bin, m.colCat)
-            if all(equalto(:Max), vd.objSenses)
-                res = nsga_max(popSize, nbGen, z, ()->bitrand(m.numCols) ; fCV = CV, kwargs...)
-            else
-                res = nsga(popSize, nbGen, z, ()->bitrand(m.numCols) ; fCV = CV, kwargs...)
-            end
+        if all(equalto(:Max), vd.objSenses)
+            res = nsga_max(popSize, nbGen, z, mc ; fCV = CV, kwargs...)
         else
-            if all(equalto(:Max), vd.objSenses)
-                res = nsga_max(popSize, nbGen, z, mc ; fCV = CV, kwargs...)
-            else
-                res = nsga(popSize, nbGen, z, mc ; fCV = CV, kwargs...)
-            end
+            res = nsga(popSize, nbGen, z, mc ; fCV = CV, kwargs...)
         end
 
         if !all(equalto(:Min), vd.objSenses) || !all(equalto(:Max), vd.objSenses)
