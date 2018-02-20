@@ -38,7 +38,7 @@ function _nsga(popSize, nbGen, m, vd, linconstr, objSenses, objs_triplets::SVect
         res
     end
 
-    z(x)::SVector{N, Float64} = objSenses .* map(obj_t->evaluate(obj_t..., x), objs_triplets)
+    z(x) = Tuple(objSenses .* map(obj_t->evaluate(obj_t..., x), objs_triplets))
 
     function CV(x)
         res::Float64 = 0.

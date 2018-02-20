@@ -1,14 +1,16 @@
-function _nsga(::Type{indiv{G,Ph,N,Y}}, sense, popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot, plotevery) where {G,Ph,N,Y}
+function _nsga(funcs::NSGA_FUNCS{G,Ph,N,Y}, sense, popSize, nbGen, pmut, seed, fplot, plotevery) where {G,Ph,N,Y}
 
     P::Vector{indiv{G,Ph,N,Y}} = Vector{indiv{G,Ph,N,Y}}(uninitialized, 2*popSize)
-    P[1:popSize-length(seed)] .= [indiv(init(), fdecode, z, fCV) for _=1:popSize-length(seed)]
+    P[1:popSize-length(seed)] .= [indiv(funcs) for _=1:popSize-length(seed)]
     for i = 1:length(seed)
-        P[popSize-length(seed)+i] = indiv(convert(G, seed[i]), fdecode, z, fCV)
+        P[popSize-length(seed)+i] = indiv(seed[i], funcs)
     end
     for i=1:popSize
         P[popSize+i] = deepcopy(P[i])
     end
     fast_non_dominated_sort!(view(P, 1:popSize), sense)
+
+    fcross, fmut, fdecode, z, fCV = funcs.fcross, funcs.fmut, funcs.fdecode, funcs.feval, funcs.fCV
 
     @showprogress 0.2 for gen = 1:nbGen
         

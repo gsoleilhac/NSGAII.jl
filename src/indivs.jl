@@ -10,10 +10,13 @@ mutable struct indiv{G, P, N, Y<:Number}#Genotype, Phenotype, Dimension(Y_N), Ty
     indiv(x::G, pheno::P, y::SVector{N, Y}, cv) where {G,P,N,Y} = new{G, P, N, Y}(x, pheno, y, cv, 0, 0., 0, [])
     indiv(x::G, pheno::P, y::NTuple{N, Y}, cv) where {G,P,N,Y} = indiv(x, pheno, SVector(y...), cv)
 end
-function indiv(x, fdecode::Function, z::Function, fCV::Function)
-    pheno = fdecode(x)
-    indiv(x, pheno, promote(z(pheno)...), fCV(pheno))
+
+
+function indiv(geno, funcs::NSGA_FUNCS{G,P,N,Y}) where {G,P,N,Y}
+    pheno = funcs.fdecode(convert(G, geno))
+    indiv(geno, pheno, promote(funcs.feval(pheno)...), funcs.fCV(pheno))
 end
+indiv(funcs) = indiv(funcs.finit(), funcs)
 
 struct Max end
 struct Min end
@@ -44,7 +47,7 @@ Base.isless(a::indiv, b::indiv) = a.rank < b.rank || a.rank == b.rank && a.crowd
 (Base.show(io::IO, ind::indiv{G,P,Y,N}) where {G,P,Y,N}) = print(io, "ind($(ind.pheno) : $(ind.y) | rank : $(ind.rank))")
 (Base.show(io::IO, ind::indiv{G,P,N,Y}) where {G,P<:AbstractVector{Bool},N,Y}) = print(io, "ind($(String(map(x->x ? '1' : '0', ind.pheno))) : $(ind.y) | rank : $(ind.rank))")
 
-function eval!(indiv::indiv, fdecode::Function, z::Function, fCV::Function)
+function eval!(indiv::indiv, fdecode, z, fCV)
     indiv.pheno = fdecode(indiv.x)
     indiv.CV = fCV(indiv.pheno)
     indiv.CV ≈ 0 && (indiv.y = z(indiv.pheno))
