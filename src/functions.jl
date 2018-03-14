@@ -59,7 +59,7 @@ function fast_non_dominated_sort!(pop::AbstractVector{T}, sense) where {T}
         p.dom_count = 0
     end
 
-    for i in 1:n
+    @inbounds for i in 1:n
         for j in i+1:n
             if dominates(sense, pop[i], pop[j])
                 push!(pop[i].dom_list, j)
@@ -76,7 +76,7 @@ function fast_non_dominated_sort!(pop::AbstractVector{T}, sense) where {T}
     end
     res = Vector{T}[]
     i = 2
-    while !isempty(F)
+    @inbounds while !isempty(F)
         Q = T[]
         for p in F
             for q in p.dom_list

@@ -2,28 +2,32 @@ function nsga(popSize, nbGen, m, ϵ::Int = 5; kwargs...)::Vector{indiv{BitVector
     vd = m.ext[:vOpt]
     @assert all(isfinite, m.colLower) "All variables must be bounded"
     @assert all(isfinite, m.colUpper) "All variables must be bounded"
-    objs_triplets = [(obj.aff.constant, obj.aff.coeffs, map(x->getfield(x, :col), obj.aff.vars)) for obj in vd.objs]
+    objs_constant = [obj.aff.constant for obj in vd.objs]
+    objs_coeffs = [obj.aff.coeffs for obj in vd.objs]
+    objs_vars = [map(x->getfield(x, :col), obj.aff.vars) for obj in vd.objs]
     if all(equalto(:Min), vd.objSenses) || all(equalto(:Max), vd.objSenses)
         objSenses = fill(1, length(vd.objs))
     else
         objSenses = map(s -> s == :Max ? -1 : 1, vd.objSenses)
     end
-    _nsga(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_triplets, ϵ ; kwargs...)
+    _nsga(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, ϵ ; kwargs...)
 end
 
 function nsga_binary(popSize, nbGen, m ; kwargs...)::Vector{indiv{BitVector, BitVector, Vector{Float64}}}
     vd = m.ext[:vOpt]
-    objs_triplets = [(obj.aff.constant, obj.aff.coeffs, map(x->getfield(x, :col), obj.aff.vars)) for obj in vd.objs]
+    objs_constant = [obj.aff.constant for obj in vd.objs]
+    objs_coeffs = [obj.aff.coeffs for obj in vd.objs]
+    objs_vars = [map(x->getfield(x, :col), obj.aff.vars) for obj in vd.objs]
     if all(equalto(:Min), vd.objSenses) || all(equalto(:Max), vd.objSenses)
         objSenses = fill(1, length(vd.objs))
     else
         objSenses = map(s -> s == :Max ? -1 : 1, vd.objSenses)
     end
-    _nsga_binary(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_triplets ; kwargs...)
+    _nsga_binary(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_constant, objs_coeffs, objs_vars ; kwargs...)
 end
 
 
-function _nsga(popSize, nbGen, m, vd, linconstr, objSenses, objs_triplets, ϵ = 5; kwargs...)::Vector{indiv{BitVector, Vector{Float64}, Vector{Float64}}}
+function _nsga(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, ϵ = 5; kwargs...)::Vector{indiv{BitVector, Vector{Float64}, Vector{Float64}}}
 
     mc = MixedCoding(ϵ, m.colCat, m.colLower, m.colUpper)
    
@@ -34,15 +38,14 @@ function _nsga(popSize, nbGen, m, vd, linconstr, objSenses, objs_triplets, ϵ = 
         end
         res
     end
-    evaluate(objs, x) = evaluate(objs[1], objs[2], objs[3], x)
 
-    z(x) = objSenses .* map(obj_t->evaluate(obj_t, x), objs_triplets)
-
+    z(x) = objSenses .* map(i->evaluate(objs_constant[i], objs_coeffs[i], objs_vars[i], x), 1:length(objSenses))
 
     cstr_var_indices = [map(v-> getfield(v, :col), CSTR.terms.vars) for CSTR in linconstr]
     cstr_coeffs = [CSTR.terms.coeffs for CSTR in linconstr]
     cstr_lb = [CSTR.lb for CSTR in linconstr]
     cstr_ub = [CSTR.ub for CSTR in linconstr]
+    intvars = find(m.colCat.==:Int)
 
     function CV(x)
         res::Float64 = 0.
@@ -76,7 +79,7 @@ function _nsga(popSize, nbGen, m, vd, linconstr, objSenses, objs_triplets, ϵ = 
             end
         end
 
-        for i in find(m.colCat.==:Int)
+        for i in intvars
             if x[i] > m.colUpper[i]
                 res += m.colUpper - x[i]
             end
@@ -102,7 +105,7 @@ function _nsga(popSize, nbGen, m, vd, linconstr, objSenses, objs_triplets, ϵ = 
     end
 end
 
-function _nsga_binary(popSize, nbGen, m, vd, linconstr, objSenses, objs_triplets; kwargs...)::Vector{indiv{BitVector, BitVector, Vector{Float64}}}
+function _nsga_binary(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, objs_coeffs, objs_vars ; kwargs...)::Vector{indiv{BitVector, BitVector, Vector{Float64}}}
    
     function evaluate(cst, coeffs, vars, x)::Float64
         res = cst
@@ -111,9 +114,8 @@ function _nsga_binary(popSize, nbGen, m, vd, linconstr, objSenses, objs_triplets
         end
         res
     end
-    evaluate(objs, x) = evaluate(objs[1], objs[2], objs[3], x)
 
-    z(x) = objSenses .* [evaluate(objs_triplets[i], x) for i in eachindex(objs_triplets)]
+    z(x) = objSenses .* map(i->evaluate(objs_constant[i], objs_coeffs[i], objs_vars[i], x), 1:length(objSenses))
 
     cstr_var_indices = [map(v-> getfield(v, :col), CSTR.terms.vars) for CSTR in linconstr]
     cstr_coeffs = [CSTR.terms.coeffs for CSTR in linconstr]
@@ -154,6 +156,9 @@ function _nsga_binary(popSize, nbGen, m, vd, linconstr, objSenses, objs_triplets
 
         res
     end
+
+    # x = bitrand(m.numCols)
+    # @code_warntype CV(x)
 
     let vd=vd
 
