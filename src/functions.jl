@@ -1,4 +1,4 @@
-function _nsga(::Type{indiv{G,Ph,N,Y}}, sense, popSize, nbGen, init, z, fdecode, fCV , pmut, fmut, fcross, seed, fplot, plotevery) where {G,Ph,N,Y}
+function _nsga(::Type{indiv{G,Ph,N,Y}}, sense, popSize, nbGen, init, z, fdecode, fdecode!, fCV , pmut, fmut, fcross, seed, fplot, plotevery) where {G,Ph,N,Y}
 
     P::Vector{indiv{G,Ph,N,Y}} = Vector{indiv{G,Ph,N,Y}}(uninitialized, 2*popSize)
     P[1:popSize-length(seed)] .= [indiv(init(), fdecode, z, fCV) for _=1:popSize-length(seed)]
@@ -10,7 +10,8 @@ function _nsga(::Type{indiv{G,Ph,N,Y}}, sense, popSize, nbGen, init, z, fdecode,
     end
     fast_non_dominated_sort!(view(P, 1:popSize), sense)
 
-    @showprogress 0.2 for gen = 1:nbGen
+    # @showprogress 0.2 for gen = 1:nbGen
+    for gen = 1:nbGen
         
         for i = 1:2:popSize
             pa = tournament_selection(view(P, 1:popSize))
@@ -21,8 +22,8 @@ function _nsga(::Type{indiv{G,Ph,N,Y}}, sense, popSize, nbGen, init, z, fdecode,
             rand() < pmut && mutate!(P[popSize+i], fmut)
             rand() < pmut && mutate!(P[popSize+i+1], fmut)
 
-            eval!(P[popSize+i], fdecode, z, fCV)
-            eval!(P[popSize+i+1], fdecode, z, fCV)
+            eval!(P[popSize+i], fdecode!, z, fCV)
+            eval!(P[popSize+i+1], fdecode!, z, fCV)
         end
 
         fast_non_dominated_sort!(P, sense)
@@ -44,7 +45,7 @@ function _nsga(::Type{indiv{G,Ph,N,Y}}, sense, popSize, nbGen, init, z, fdecode,
         gen % plotevery == 0 && fplot(P)
     end
     fplot(P)
-    filter(x->x.rank==1, P)
+    filter!(x->x.rank==1, P)
 end
 
 function fast_non_dominated_sort!(pop::AbstractVector{T}, sense) where {T}
@@ -92,9 +93,9 @@ function fast_non_dominated_sort!(pop::AbstractVector{T}, sense) where {T}
 end
 
 function crowding_distance_assignement!(pop::AbstractVector{indiv{X,G,2,Y}}) where {X, G, Y}
-    sort!(pop, by = x-> x.y[1])
+    sort!(pop, by=x->x.y[1])
     pop[1].crowding = pop[end].crowding = Inf
-    for i = 2:length(pop)-1
+    @inbounds for i = 2:length(pop)-1
         pop[i].crowding = (pop[i+1].y[1]-pop[i-1].y[1]) / (pop[end].y[1]-pop[1].y[1])
         pop[i].crowding += (pop[i-1].y[2]-pop[i+1].y[2]) / (pop[1].y[2]-pop[end].y[2])
     end
@@ -118,6 +119,6 @@ function crowding_distance_assignement!(pop::AbstractVector{indiv{X,G,N,Y}}) whe
 end
 
 function tournament_selection(P)
-    a, b = rand(P), rand(P)
+    a, b = rand(P, 2)
     a < b ? a : b
 end

@@ -29,9 +29,15 @@ function MixedCoding(ϵ::Int, types::Vector{Symbol}, lb, ub)
 end
 RealCoding(ϵ::Int, lb, ub) = MixedCoding(ϵ, fill(:Cont, length(lb)), lb, ub)
 
-function decode(x, d::MixedCoding)::Vector{Float64}
 
+function decode(x, d::MixedCoding)
     res = zeros(d.nbvar)
+    decode!(x, d, res)
+    res
+end
+
+function decode!(x, d::MixedCoding, res::Vector{Float64})
+
     j = 0
     for i = 1:d.nbvar
         j += d.nbbits[i]

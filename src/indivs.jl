@@ -1,4 +1,4 @@
-mutable struct indiv{G, P, N, Y<:Number}#Genotype, Phenotype, Dimension(Y_N), Type(Y_N)
+mutable struct indiv{G, P, N, Y<:Number}#Genotype, Phenotype, Type(Y_N), Dimension(Y_N)
     x::G
     pheno::P
     y::SVector{N, Y}
@@ -7,7 +7,7 @@ mutable struct indiv{G, P, N, Y<:Number}#Genotype, Phenotype, Dimension(Y_N), Ty
     crowding::Float64
     dom_count::UInt16
     dom_list::Vector{UInt16}
-    indiv(x::G, pheno::P, y::SVector{N, Y}, cv) where {G,P,N,Y} = new{G, P, N, Y}(x, pheno, y, cv, 0, 0., 0, [])
+    indiv(x::G, pheno::P, y::SVector{N, Y}, cv) where {G,P,N,Y} = new{G, P, N, Y}(x, pheno, y, cv, 0, 0., 0, UInt16[])
     indiv(x::G, pheno::P, y::NTuple{N, Y}, cv) where {G,P,N,Y} = indiv(x, pheno, SVector(y...), cv)
 end
 function indiv(x, fdecode::Function, z::Function, fCV::Function)
@@ -44,8 +44,8 @@ Base.isless(a::indiv, b::indiv) = a.rank < b.rank || a.rank == b.rank && a.crowd
 (Base.show(io::IO, ind::indiv{G,P,Y,N}) where {G,P,Y,N}) = print(io, "ind($(ind.pheno) : $(ind.y) | rank : $(ind.rank))")
 (Base.show(io::IO, ind::indiv{G,P,N,Y}) where {G,P<:AbstractVector{Bool},N,Y}) = print(io, "ind($(String(map(x->x ? '1' : '0', ind.pheno))) : $(ind.y) | rank : $(ind.rank))")
 
-function eval!(indiv::indiv, fdecode::Function, z::Function, fCV::Function)
-    indiv.pheno = fdecode(indiv.x)
+function eval!(indiv::indiv, fdecode!::Function, z::Function, fCV::Function)
+    fdecode!(indiv.x, indiv.pheno)
     indiv.CV = fCV(indiv.pheno)
     indiv.CV ≈ 0 && (indiv.y = z(indiv.pheno))
     indiv
