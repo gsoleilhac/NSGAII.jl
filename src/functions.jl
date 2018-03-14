@@ -1,9 +1,11 @@
-function _nsga(::Type{indiv{G,Ph,N,Y}}, sense, popSize, nbGen, init, z, fdecode, fdecode!, fCV , pmut, fmut, fcross, seed, fplot, plotevery) where {G,Ph,N,Y}
+function _nsga(::indiv{G,Ph,Y}, sense, popSize, nbGen, init, z, fdecode, fdecode!, fCV , pmut, fmut, fcross, seed, fplot, plotevery)::Vector{indiv{G,Ph,Y}} where {G,Ph,Y}
 
-    P::Vector{indiv{G,Ph,N,Y}} = Vector{indiv{G,Ph,N,Y}}(uninitialized, 2*popSize)
-    P[1:popSize-length(seed)] .= [indiv(init(), fdecode, z, fCV) for _=1:popSize-length(seed)]
+    popSize = max(popSize, length(seed))
+    isodd(popSize) && (popSize += 1)
+    P = Vector{indiv{G,Ph,Y}}(undef, 2*popSize)
+    P[1:popSize-length(seed)] .= [create_indiv(init(), fdecode, z, fCV) for _=1:popSize-length(seed)]
     for i = 1:length(seed)
-        P[popSize-length(seed)+i] = indiv(convert(G, seed[i]), fdecode, z, fCV)
+        P[popSize-length(seed)+i] = create_indiv(convert(G, seed[i]), fdecode, z, fCV)
     end
     for i=1:popSize
         P[popSize+i] = deepcopy(P[i])
@@ -92,27 +94,27 @@ function fast_non_dominated_sort!(pop::AbstractVector{T}, sense) where {T}
     res
 end
 
-function crowding_distance_assignement!(pop::AbstractVector{indiv{X,G,2,Y}}) where {X, G, Y}
-    sort!(pop, by=x->x.y[1])
-    pop[1].crowding = pop[end].crowding = Inf
-    @inbounds for i = 2:length(pop)-1
-        pop[i].crowding = (pop[i+1].y[1]-pop[i-1].y[1]) / (pop[end].y[1]-pop[1].y[1])
-        pop[i].crowding += (pop[i-1].y[2]-pop[i+1].y[2]) / (pop[1].y[2]-pop[end].y[2])
-    end
-end
-
-function crowding_distance_assignement!(pop::AbstractVector{indiv{X,G,N,Y}}) where {X,G,N,Y}
-    for ind in pop
-        ind.crowding = 0.
-    end
-    @inbounds for j = 1:N # Foreach objective
-        let j = j #https://github.com/JuliaLang/julia/issues/15276
-            sort!(pop, by = x-> x.y[j]) #sort by the objective value
+function crowding_distance_assignement!(pop::AbstractVector{indiv{X,G,Y}}) where {X, G, Y}
+    if length(first(pop).y) == 2
+        sort!(pop, by=x->x.y[1])
+        pop[1].crowding = pop[end].crowding = Inf
+        @inbounds for i = 2:length(pop)-1
+            pop[i].crowding = (pop[i+1].y[1]-pop[i-1].y[1]) / (pop[end].y[1]-pop[1].y[1])
+            pop[i].crowding += (pop[i-1].y[2]-pop[i+1].y[2]) / (pop[1].y[2]-pop[end].y[2])
         end
-        pop[1].crowding = pop[end].crowding = Inf #Assign infinite value to extremas
-        if pop[1].y[j] != pop[end].y[j]
-            for i = 2:length(pop)-1
-                pop[i].crowding += (pop[i+1].y[j]-pop[i-1].y[j]) / (pop[end].y[j]-pop[1].y[j])
+    else
+        for ind in pop
+            ind.crowding = 0.
+        end
+        @inbounds for j = 1:length(first(pop).y) # Foreach objective
+            let j = j #https://github.com/JuliaLang/julia/issues/15276
+                sort!(pop, by = x-> x.y[j]) #sort by the objective value
+            end
+            pop[1].crowding = pop[end].crowding = Inf #Assign infinite value to extremas
+            if pop[1].y[j] != pop[end].y[j]
+                for i = 2:length(pop)-1
+                    pop[i].crowding += (pop[i+1].y[j]-pop[i-1].y[j]) / (pop[end].y[j]-pop[1].y[j])
+                end
             end
         end
     end
