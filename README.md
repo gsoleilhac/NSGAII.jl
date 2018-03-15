@@ -95,7 +95,7 @@ You can provide your own with the keywords `fdecode` and `fdecode!` which will w
 Note : if your decode function takes a genotype `G` and returns a phenotype `P`, make sure your crossovers and mutations functions work on type `G`, and that your evaluation and (if provided) your constraint-violation  functions work on type `P`  
 `fdecode!` should take as parameters a genotype `G` and a phenotype `P` and modify it in-place.
 
-See [BinaryCoding](https://github.com/gsoleilhac/NSGAII.jl##BinaryCoding)
+See [BinaryCoding](https://github.com/gsoleilhac/NSGAII.jl#BinaryCoding)
 
 
 ### Seeding
