@@ -92,7 +92,7 @@ So far, we haven't seen the difference between the genotype and the phenotype ; 
 
 You can provide your own with the keywords `fdecode` and `fdecode!` which will work in-place.
 
-Note : if your decode function takes a genotype `G` and returns a phenotype `P`, make sure your crossovers and mutations functions work on type `G`, and that your evaluation and (if provided) your constraint-violation  functions work on type `P`  
+Note : if your decode function takes a genotype `G` and returns a phenotype `P`, make sure your crossovers and mutations functions work on type `G`, and that your evaluation and (if provided) your constraint-violation  functions work on type `P`.  
 `fdecode!` should take as parameters a genotype `G` and a phenotype `P` and modify it in-place.
 
 See [BinaryCoding](https://github.com/gsoleilhac/NSGAII.jl#binarycoding)
