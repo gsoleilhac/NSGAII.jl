@@ -35,7 +35,7 @@ end
 
 function _nsga_vopt(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, ϵ, pmut, fmut, fcross, seed, fplot, plotevery)
 
-    mc = MixedCoding(ϵ, m.colCat, m.colLower, m.colUpper)
+    bc = BinaryCoding(ϵ, m.colCat, m.colLower, m.colUpper)
    
     function evaluate(cst, coeffs, vars, x)::Float64
         res = cst
@@ -94,19 +94,19 @@ function _nsga_vopt(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, 
         res
     end
 
-    # x = decode(bitrand(mc.nbbitstotal), mc)
+    # x = decode(bitrand(bc.nbbitstotal), bc)
     # @code_warntype z(x)
 
-    let mc=mc
+    let bc=bc
 
         if all(equalto(:Max), vd.objSenses)
             res = _nsga(indiv(falses(0), Float64[], Float64[], 0.), Max(), popSize, nbGen, 
-            ()->bitrand(mc.nbbitstotal), z, x->decode(x, mc), (g,f)->decode!(g, mc, f), 
-            CV, pmut, fmut, fcross, encode.(seed, mc), fplot, plotevery)
+            ()->bitrand(bc.nbbitstotal), z, x->decode(x, bc), (g,f)->decode!(g, bc, f), 
+            CV, pmut, fmut, fcross, encode.(seed, bc), fplot, plotevery)
         else
             res = _nsga(indiv(falses(0), Float64[], Float64[], 0.), Min(), popSize, nbGen, 
-            ()->bitrand(mc.nbbitstotal), z, x->decode(x, mc), (g,f)->decode!(g, mc, f), 
-            CV, pmut, fmut, fcross, encode.(seed, mc), fplot, plotevery)
+            ()->bitrand(bc.nbbitstotal), z, x->decode(x, bc), (g,f)->decode!(g, bc, f), 
+            CV, pmut, fmut, fcross, encode.(seed, bc), fplot, plotevery)
         end
 
         if !all(equalto(:Min), vd.objSenses) || !all(equalto(:Max), vd.objSenses)

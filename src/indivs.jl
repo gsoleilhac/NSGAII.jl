@@ -7,7 +7,7 @@ mutable struct indiv{G, P, Y}#Genotype, Phenotype, Type(Y_N)
     crowding::Float64
     dom_count::UInt16
     dom_list::Vector{UInt16}
-    indiv(x::G, pheno::P, y::Y, cv::Float64) where {G,P,Y} = new{G, P, Y}(x, pheno, y, cv, 0, 0., 0, UInt16[])
+    indiv(x::G, pheno::P, y::Y, cv) where {G,P,Y} = new{G, P, Y}(x, pheno, y, cv, 0, 0., 0, UInt16[])
 end
 function create_indiv(x, fdecode, z, fCV)
     pheno = fdecode(x)

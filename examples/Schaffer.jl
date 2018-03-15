@@ -12,6 +12,6 @@ function plot_pop(P)
     sleep(0.2)
 end
 
-const d = RealCoding(6, [-10], [10])
+const d = BinaryCoding(6, [-10], [10])
 z(x) = ( x[1]^2 , (x[1]-2)^2 )
 nsga(200, 20, z, d, fplot = plot_pop)

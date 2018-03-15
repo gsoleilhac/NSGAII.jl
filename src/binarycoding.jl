@@ -1,4 +1,4 @@
-struct MixedCoding
+struct BinaryCoding
     nbvar::Int
     types::Vector{Symbol}
     lb::Vector{Float64}
@@ -7,7 +7,7 @@ struct MixedCoding
     nbbitstotal::Int
 end
 
-function MixedCoding(ϵ::Int, types::Vector{Symbol}, lb, ub)
+function BinaryCoding(ϵ::Int, types::Vector{Symbol}, lb, ub)
     @assert length(types)==length(lb)==length(ub)
     @assert all(lb .< ub)
     @assert UInt128(10)^ϵ <= UInt128(2)^127
@@ -25,18 +25,18 @@ function MixedCoding(ϵ::Int, types::Vector{Symbol}, lb, ub)
             end
         end
     end
-    MixedCoding(nbvar, types, lb, ub, nbbits, sum(nbbits))
+    BinaryCoding(nbvar, types, lb, ub, nbbits, sum(nbbits))
 end
-RealCoding(ϵ::Int, lb, ub) = MixedCoding(ϵ, fill(:Cont, length(lb)), lb, ub)
+BinaryCoding(ϵ::Int, lb, ub) = BinaryCoding(ϵ, fill(:Cont, length(lb)), lb, ub)
 
 
-function decode(x, d::MixedCoding)
+function decode(x, d::BinaryCoding)
     res = zeros(d.nbvar)
     decode!(x, d, res)
     res
 end
 
-function decode!(x, d::MixedCoding, res::Vector{Float64})
+function decode!(x, d::BinaryCoding, res::Vector{Float64})
 
     j = 0
     for i = 1:d.nbvar
@@ -61,7 +61,7 @@ function decode!(x, d::MixedCoding, res::Vector{Float64})
     res
 end
 
-function encode(x, d::MixedCoding)::BitVector
+function encode(x, d::BinaryCoding)::BitVector
     res = BitVector()
     sizehint!(res, d.nbbitstotal)
     for i = 1:d.nbvar

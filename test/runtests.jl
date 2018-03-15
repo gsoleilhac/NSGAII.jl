@@ -11,7 +11,7 @@ z(x::Vector{Int}) = z(x, C1), z(x, C2), z(x, C3)
 res = unique(nsga(500, 100, z, ()->randperm(4)))
 @test length(res) == 7
 
-const d = RealCoding(6, [-10], [10])
+const d = BinaryCoding(6, [-10], [10])
 z(x) = x[1]^2, (x[1] - 2)^2
 seed = [-10 + rand()*20 for _ =1:100]
 res = nsga(500, 200, z, d, seed = seed)
