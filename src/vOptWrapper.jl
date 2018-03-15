@@ -1,4 +1,7 @@
-function nsga(popSize, nbGen, m, ϵ::Int = 5; kwargs...)::Vector{indiv{BitVector, Vector{Float64}, Vector{Float64}}}
+function nsga(popSize, nbGen, m, ϵ::Int = 5; 
+    pmut=0.05, fmut=default_mutation!, fcross = default_crossover!, 
+    seed=Vector{Float64}[], fplot = (x)->nothing, plotevery=10)
+
     vd = m.ext[:vOpt]
     @assert all(isfinite, m.colLower) "All variables must be bounded"
     @assert all(isfinite, m.colUpper) "All variables must be bounded"
@@ -10,10 +13,13 @@ function nsga(popSize, nbGen, m, ϵ::Int = 5; kwargs...)::Vector{indiv{BitVector
     else
         objSenses = map(s -> s == :Max ? -1 : 1, vd.objSenses)
     end
-    _nsga(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, ϵ ; kwargs...)
+    _nsga_vopt(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, ϵ,  pmut, fmut, fcross, seed, fplot, plotevery)
 end
 
-function nsga_binary(popSize, nbGen, m ; kwargs...)::Vector{indiv{BitVector, BitVector, Vector{Float64}}}
+function nsga_binary(popSize, nbGen, m ; 
+    pmut=0.05, fmut=default_mutation!, fcross = default_crossover!, 
+    seed=Vector{BitVector}[], fplot = (x)->nothing, plotevery=10)
+
     vd = m.ext[:vOpt]
     objs_constant = [obj.aff.constant for obj in vd.objs]
     objs_coeffs = [obj.aff.coeffs for obj in vd.objs]
@@ -23,11 +29,11 @@ function nsga_binary(popSize, nbGen, m ; kwargs...)::Vector{indiv{BitVector, Bit
     else
         objSenses = map(s -> s == :Max ? -1 : 1, vd.objSenses)
     end
-    _nsga_binary(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_constant, objs_coeffs, objs_vars ; kwargs...)
+    _nsga_binary_vopt(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, pmut, fmut, fcross, seed, fplot, plotevery)
 end
 
 
-function _nsga(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, ϵ = 5; kwargs...)::Vector{indiv{BitVector, Vector{Float64}, Vector{Float64}}}
+function _nsga_vopt(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, ϵ, pmut, fmut, fcross, seed, fplot, plotevery)
 
     mc = MixedCoding(ϵ, m.colCat, m.colLower, m.colUpper)
    
@@ -40,7 +46,7 @@ function _nsga(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, objs_
     end
 
     z(x) = objSenses .* map(i->evaluate(objs_constant[i], objs_coeffs[i], objs_vars[i], x), 1:length(objSenses))
-
+    
     cstr_var_indices = [map(v-> getfield(v, :col), CSTR.terms.vars) for CSTR in linconstr]
     cstr_coeffs = [CSTR.terms.coeffs for CSTR in linconstr]
     cstr_lb = [CSTR.lb for CSTR in linconstr]
@@ -88,24 +94,31 @@ function _nsga(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, objs_
         res
     end
 
+    # x = decode(bitrand(mc.nbbitstotal), mc)
+    # @code_warntype z(x)
+
     let mc=mc
 
         if all(equalto(:Max), vd.objSenses)
-            res = nsga_max(popSize, nbGen, z, mc ; fCV = CV, kwargs...)
+            res = _nsga(indiv(falses(0), Float64[], Float64[], 0.), Max(), popSize, nbGen, 
+            ()->bitrand(mc.nbbitstotal), z, x->decode(x, mc), (g,f)->decode!(g, mc, f), 
+            CV, pmut, fmut, fcross, encode.(seed, mc), fplot, plotevery)
         else
-            res = nsga(popSize, nbGen, z, mc ; fCV = CV, kwargs...)
+            res = _nsga(indiv(falses(0), Float64[], Float64[], 0.), Min(), popSize, nbGen, 
+            ()->bitrand(mc.nbbitstotal), z, x->decode(x, mc), (g,f)->decode!(g, mc, f), 
+            CV, pmut, fmut, fcross, encode.(seed, mc), fplot, plotevery)
         end
 
         if !all(equalto(:Min), vd.objSenses) || !all(equalto(:Max), vd.objSenses)
             for indiv in res
-                indiv.y = indiv.y .* objSenses
+                indiv.y .*= objSenses
             end
         end
         return res
     end
 end
 
-function _nsga_binary(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, objs_coeffs, objs_vars ; kwargs...)::Vector{indiv{BitVector, BitVector, Vector{Float64}}}
+function _nsga_binary_vopt(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, pmut, fmut, fcross, seed, fplot, plotevery)
    
     function evaluate(cst, coeffs, vars, x)::Float64
         res = cst
@@ -157,15 +170,15 @@ function _nsga_binary(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant
         res
     end
 
-    # x = bitrand(m.numCols)
-    # @code_warntype CV(x)
+    x = bitrand(m.numCols)
+    @code_warntype CV(x)
 
     let vd=vd
 
         if all(equalto(:Max), vd.objSenses)
-            res = nsga_max(popSize, nbGen, z, ()->bitrand(m.numCols) ; fCV = CV, kwargs...)
+            res = nsga_max(popSize, nbGen, z, ()->bitrand(m.numCols) ; fCV = CV,  pmut=pmut, fmut=fmut, fcross=fcross, seed=seed, fplot=fplot, plotevery=plotevery)
         else
-            res = nsga(popSize, nbGen, z, ()->bitrand(m.numCols) ; fCV = CV, kwargs...)
+            res = nsga(popSize, nbGen, z, ()->bitrand(m.numCols) ; fCV = CV,  pmut=pmut, fmut=fmut, fcross=fcross, seed=seed, fplot=fplot, plotevery=plotevery)
         end
 
         if !all(equalto(:Min), vd.objSenses) || !all(equalto(:Max), vd.objSenses)

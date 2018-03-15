@@ -16,8 +16,9 @@ function _nsga(::indiv{G,Ph,Y}, sense, popSize, nbGen, init, z, fdecode, fdecode
     for gen = 1:nbGen
         
         for i = 1:2:popSize
-            pa = tournament_selection(view(P, 1:popSize))
-            pb = tournament_selection(view(P, 1:popSize))
+
+            pa = tournament_selection(P)
+            pb = tournament_selection(P)
 
             crossover!(pa, pb, fcross, P[popSize+i], P[popSize+i+1])
 
@@ -121,6 +122,6 @@ function crowding_distance_assignement!(pop::AbstractVector{indiv{X,G,Y}}) where
 end
 
 function tournament_selection(P)
-    a, b = rand(P, 2)
-    a < b ? a : b
+    a, b = rand(1:length(P)÷2), rand(1:length(P)÷2)
+    P[a] < P[b] ? P[a] : P[b]
 end
