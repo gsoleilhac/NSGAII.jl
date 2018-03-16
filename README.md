@@ -52,7 +52,7 @@ function CV(x)
 end
 
 #We can now call
-result = nsga_max(popsize, nbgen, z, init, fCV = CV)
+nsga_max(popsize, nbgen, z, init, fCV = CV)
 ```
 
 ### Crossover
@@ -143,23 +143,16 @@ You can use `BinaryCoding(ϵ::Int, lb::Vector, ub::Vector)` to encode real varia
 Example : 
 
 ```julia 
-using NSGAII, PyPlot
+using NSGAII
 
-function plot_pop(P)
-    clf()
-    P = filter(indiv -> indiv.rank == 1, P) #keep only the non-dominated solutions
-    plot(map(x -> x.y[1], P), map(x -> x.y[2], P), "bo", markersize=1)
-    !isinteractive() && show()
-    sleep(0.2)
-end
 
-const d = BinaryCoding(6, [-3, -3], [3, 3]) #Two variables -3 <= x_i <= 3, encoded with a precision of 6 decimal places
+const bc = BinaryCoding(6, [-3, -3], [3, 3]) #Two variables -3 <= x_i <= 3, encoded with a precision of 6 decimal places
 
 z1(x1, x2) = -(3(1-x1)^2 * exp(-x1^2 - (x2+1)^2) - 10(x1/5 - x1^3 - x2^5) * exp(-x1^2-x2^2) -3exp(-(x1+2)^2 - x2^2) + 0.5(2x1 + x2))
 z2(x1, x2) = -(3(1+x2)^2 * exp(-x2^2 - (1-x1)^2) - 10(-x2/5 + x2^3 + x1^5) * exp(-x1^2-x2^2) - 3exp(-(2-x2)^2 - x1^2))
 z(x) = z1(x[1], x[2]), z2(x[1], x[2])
 
-nsga(300, 50, z, d, fplot = plot_pop, seed = [[.0, 0.], [1., 1.5]])
+nsga(300, 50, z, bc, seed = [[.0, 0.], [1., 1.5]])
 ```
 
 * You don't have to provide a initialisation function anymore, a bitstring of the appropriate length will be generated.
