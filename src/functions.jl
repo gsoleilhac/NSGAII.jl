@@ -48,7 +48,7 @@ function _nsga(::indiv{G,Ph,Y}, sense, popSize, nbGen, init, z, fdecode, fdecode
         gen % plotevery == 0 && fplot(P)
     end
     fplot(P)
-    filter!(x->x.rank==1, P)
+    filter!(x->x.rank==1, view(P, 1:popSize))
 end
 
 function fast_non_dominated_sort!(pop::AbstractVector{T}, sense) where {T}
