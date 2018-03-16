@@ -35,7 +35,7 @@ nbgen = 200
 init() = bitrand(n) #our genotype is a random binary vector
 z(x) = dot(x, p1), dot(x, p2) #and our objectives are the sum of the items we pick
 ```
-Now, this would be enough to run nsgaii with
+Now, this would be enough to run nsga-2 with
 `nsga_max(popsize, nbgen, z, init)`  
 But we need to add the constraint that all items must fit in the knapsack.  
 For this we define a *constraint-violation function* that returns 0 only if the solution is feasible,  
@@ -105,7 +105,7 @@ You can provide your own with the keywords `fdecode` and `fdecode!` which will w
 Note : if your decode function takes a genotype `G` and returns a phenotype `P`, make sure your crossovers and mutations functions work on type `G`, and that your evaluation and (if provided) your constraint-violation  functions work on type `P`.  
 `fdecode!` should take as parameters a genotype `G` and a phenotype `P` and modify it in-place.
 
-See [BinaryCoding](https://github.com/gsoleilhac/NSGAII.jl#binarycoding)
+See [BinaryCoding](https://github.com/gsoleilhac/NSGAII.jl#binarycoding) to easily encode/decode real variables.
 
 
 ### Seeding
