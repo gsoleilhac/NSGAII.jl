@@ -2,7 +2,7 @@ __precompile__()
 module NSGAII
 
 export nsga, nsga_max, nsga_binary, BinaryCoding
-using ProgressMeter, StaticArrays, Compat, Compat.Random, Traceur
+using ProgressMeter, Compat, Compat.Random
 
 include("indivs.jl")
 include("functions.jl")
