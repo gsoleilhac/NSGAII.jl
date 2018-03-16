@@ -32,7 +32,7 @@ The four mandatory parameters of NSGAII are
 ```julia
 popsize = 100
 nbgen = 200
-init() = bitrand(n) #our genotype is a random binary vector
+init() = bitrand(n) #our genotype is a binary vector of size n, initialized randomly:
 z(x) = dot(x, p1), dot(x, p2) #and our objectives are the sum of the items we pick
 ```
 Now, this would be enough to run nsga-2 with
@@ -77,6 +77,9 @@ end
 
 nsga_max(popsize, nbgen, z, init, fCV = CV, fcross = one_point_crossover!)
 ```
+
+*For permutations genotypes, the default crossover is the PMX (Partially-Mapped Crossover).*
+
 ### Mutation
 
 The default mutation for a binary vector is the *bitstring mutation* where each bit has a probability 1/l to be flipped (where l is the length of the vector)
@@ -95,6 +98,8 @@ end
 
 nsga_max(popsize, nbgen, z, init, fCV = CV, fmut = two_bits_flip!, pmut = 0.2)
 ```
+
+*For permutations genotypes, the default mutation randomly swaps two indices.*
 
 ### Genotype and Phenotype
 
