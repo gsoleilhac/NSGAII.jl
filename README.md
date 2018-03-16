@@ -153,7 +153,7 @@ f3(x1,x2) = ((x1+2x2-1)^2)/175 + ((-x1+2x2)^2)/17 - 13
 
 z(x) = f1(x[1], x[2]), f3(x[1], x[2]), f3(x[1], x[2])
 
-const bc = BinaryCoding(4, [-400, -400], [400, 400])
+const bc = BinaryCoding(4, [-400, -400], [400, 400]) #Encodes two variables -400 <= x_i <= 400, with a precision of 1E-4
 
 function plot_pop(P)
     clf() #clears the figure
