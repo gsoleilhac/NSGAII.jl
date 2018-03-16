@@ -51,7 +51,7 @@ result = nsga_max(popsize, nbgen, z, init, fCV = CV)
 
 ### Crossover
 
-Because the solutions are encoded as bitstrings, nsga will use by default a 2-point crossover, but we can define our own and assign it with the keyword `fcross`:
+If the solutions are encoded as bitstrings, nsga will use by default a 2-point crossover, but we can define our own and assign it with the keyword `fcross`:
 
 ```julia
 function one_point_crossover!(parent_a, parent_b, child_a, child_b)
@@ -88,7 +88,7 @@ nsga_max(popsize, nbgen, z, init, fCV = CV, fmut = two_bits_flip!, pmut = 0.2)
 
 ### Genotype and Phenotype
 
-So far, we haven't seen the difference between the genotype and the phenotype ; the default decoding function used here is the *identity* function
+So far, we haven't made any difference between the genotype and the phenotype ; the default decoding function used here is the *identity* function
 
 You can provide your own with the keywords `fdecode` and `fdecode!` which will work in-place.
 
