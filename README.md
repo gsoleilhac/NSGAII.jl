@@ -44,7 +44,7 @@ and a value > 0 otherwise.
 ```julia
 function CV(x)
     sumW = dot(x, w)
-    return sumW < c ? 0 : sumW - c
+    return sumW <= c ? 0 : sumW - c
 end
 
 #We can now call
