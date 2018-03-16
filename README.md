@@ -16,11 +16,11 @@ Pkg.clone("https://github.com/gsoleilhac/NSGAII.jl")
 
 ```julia
 using NSGAII
+n = 20 #Number of items
 p1 = [77,94,71,63,96,82,85,75,72,91,99,63,84,87,79,94,90,60,69,62] #Coeffs objective 1
 p2 = [65,90,90,77,95,84,70,94,66,92,74,97,60,60,65,97,93,60,69,74] #Coeffs objective 2
 w = [80,87,68,72,66,77,99,85,70,93,98,72,100,89,67,86,91,79,71,99] #Items weights
 c = 900 #Knapsack capacity
-n = length(p1) #Number of items
 ```
 
 The four mandatory parameters of NSGAII are 
@@ -35,7 +35,7 @@ nbgen = 200
 init() = bitrand(n) #our genotype is a random binary vector
 z(x) = dot(x, p1), dot(x, p2) #and our objectives are the sum of the items we pick
 ```
-Now, this would be enough to run nsgaii with
+Now, this would be enough to run nsga-2 with
 `nsga_max(popsize, nbgen, z, init)`  
 But we need to add the constraint that all items must fit in the knapsack.  
 For this we define a *constraint-violation function* that returns 0 only if the solution is feasible,  
@@ -44,7 +44,7 @@ and a value > 0 otherwise.
 ```julia
 function CV(x)
     sumW = dot(x, w)
-    return sumW < c ? 0 : sumW - c
+    return sumW <= c ? 0 : sumW - c
 end
 
 #We can now call
@@ -105,7 +105,7 @@ You can provide your own with the keywords `fdecode` and `fdecode!` which will w
 Note : if your decode function takes a genotype `G` and returns a phenotype `P`, make sure your crossovers and mutations functions work on type `G`, and that your evaluation and (if provided) your constraint-violation  functions work on type `P`.  
 `fdecode!` should take as parameters a genotype `G` and a phenotype `P` and modify it in-place.
 
-See [BinaryCoding](https://github.com/gsoleilhac/NSGAII.jl#binarycoding)
+See [BinaryCoding](https://github.com/gsoleilhac/NSGAII.jl#binarycoding) to easily encode/decode real variables.
 
 
 ### Seeding
