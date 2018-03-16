@@ -153,11 +153,12 @@ f3(x1,x2) = ((x1+2x2-1)^2)/175 + ((-x1+2x2)^2)/17 - 13
 
 z(x) = f1(x[1], x[2]), f3(x[1], x[2]), f3(x[1], x[2])
 
-const bc = BinaryCoding(4, [-400, -400], [400, 400]) #Encodes two variables -400 <= x_i <= 400, with a precision of 1E-4
+#Encodes two variables -400 <= x_i <= 400, with a precision of 1E-4
+const bc = BinaryCoding(4, [-400, -400], [400, 400]) 
 
 function plot_pop(P)
     clf() #clears the figure
-    P = filter(indiv -> indiv.rank <= 1, P) #keep only the non-dominated solutions
+    P = filter(indiv -> indiv.rank <= 1, P) #keeps only the non-dominated solutions
     plot3D(map(x -> x.y[1], P), map(x -> x.y[2], P),  map(x -> x.y[3], P), "bo", markersize=1)
     sleep(0.1)
 end
@@ -165,7 +166,7 @@ end
 nsga(200, 100, z, bc, fplot=plot_pop)
 ```
 
-* You don't have to provide a initialisation function anymore, a bitstring of the appropriate length will be generated.
-* The seed can be passed as a vector of phenotypes, not a vector of genotypes
+* You don't have to provide a initialization function anymore, a bitstring of the appropriate length will be generated.
+* The seed can be passed as a vector of phenotypes, not a vector of genotypes, it will automatically be encoded.
 
 You can also use `BinaryCoding(ϵ::Int, types, lb, ub)` to encode a mix of integer, continuous or binary variables, with `types` a vector of symbols : `( :Int |  :Cont | :Bin )`, 
