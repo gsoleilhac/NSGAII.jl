@@ -140,19 +140,29 @@ nsga_max(popsize, nbgen, z, init, fCV = CV, fplot = plot_pop, plotevery = 5)
 
 You can use `BinaryCoding(ϵ::Int, lb::Vector, ub::Vector)` to encode real variables with a precision `ϵ`, and with lower and upper bounds `lb` and `ub`
 
-Example : 
+Example : MOP7 from Van Valedhuizen’s Test Suite  
+
+![MOP7](https://raw.githubusercontent.com/gsoleilhac/NSGAII.jl/master/MOP7.png "MOP7")
 
 ```julia 
-using NSGAII
+using NSGAII, PyPlot
 
+f1(x1,x2) = ((x1-1)^2)/2 + ((x2+1)^2)/13 + 3
+f2(x1,x2) = ((x1+x2-3)^2)/2 + ((-x1+x2+2)^2)/8 - 17
+f3(x1,x2) = ((x1+2x2-1)^2)/175 + ((-x1+2x2)^2)/17 - 13
 
-const bc = BinaryCoding(6, [-3, -3], [3, 3]) #Two variables -3 <= x_i <= 3, encoded with a precision of 6 decimal places
+z(x) = f1(x[1], x[2]), f3(x[1], x[2]), f3(x[1], x[2])
 
-z1(x1, x2) = -(3(1-x1)^2 * exp(-x1^2 - (x2+1)^2) - 10(x1/5 - x1^3 - x2^5) * exp(-x1^2-x2^2) -3exp(-(x1+2)^2 - x2^2) + 0.5(2x1 + x2))
-z2(x1, x2) = -(3(1+x2)^2 * exp(-x2^2 - (1-x1)^2) - 10(-x2/5 + x2^3 + x1^5) * exp(-x1^2-x2^2) - 3exp(-(2-x2)^2 - x1^2))
-z(x) = z1(x[1], x[2]), z2(x[1], x[2])
+const bc = BinaryCoding(4, [-400, -400], [400, 400])
 
-nsga(300, 50, z, bc, seed = [[.0, 0.], [1., 1.5]])
+function plot_pop(P)
+    clf() #clears the figure
+    P = filter(indiv -> indiv.rank <= 1, P) #keep only the non-dominated solutions
+    plot3D(map(x -> x.y[1], P), map(x -> x.y[2], P),  map(x -> x.y[3], P), "bo", markersize=1)
+    sleep(0.1)
+end
+
+nsga(200, 100, z, bc, fplot=plot_pop)
 ```
 
 * You don't have to provide a initialisation function anymore, a bitstring of the appropriate length will be generated.
