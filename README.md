@@ -160,7 +160,7 @@ f1(x1,x2) = ((x1-1)^2)/2 + ((x2+1)^2)/13 + 3
 f2(x1,x2) = ((x1+x2-3)^2)/2 + ((-x1+x2+2)^2)/8 - 17
 f3(x1,x2) = ((x1+2x2-1)^2)/175 + ((-x1+2x2)^2)/17 - 13
 
-z(x) = f1(x[1], x[2]), f3(x[1], x[2]), f3(x[1], x[2])
+z(x) = f1(x[1], x[2]), f2(x[1], x[2]), f3(x[1], x[2])
 
 #Encodes two variables -400 <= x_i <= 400, with a precision of 1E-4
 const bc = BinaryCoding(4, [-400, -400], [400, 400]) 
@@ -172,10 +172,18 @@ function plot_pop(P)
     sleep(0.1)
 end
 
-nsga(200, 100, z, bc, fplot=plot_pop)
+nsga(200, 200, z, bc, seed = [[1.,-1.],[2.5,0.5],[0.5,0.25]], fplot=plot_pop, plotevery=1)
 ```
 
 * You don't have to provide a initialization function anymore, a bitstring of the appropriate length will be generated.
 * The seed can be passed as a vector of phenotypes, not a vector of genotypes, it will automatically be encoded.
 
-You can also use `BinaryCoding(ϵ::Int, types, lb, ub)` to encode a mix of integer, continuous or binary variables, with `types` a vector of symbols : `( :Int |  :Cont | :Bin )`, 
+You can also use `BinaryCoding(ϵ::Int, types, lb, ub)` to encode a mix of integer, continuous or binary variables, with `types` a vector of symbols : `( :Int |  :Cont | :Bin )`.
+
+### Misc
+
+The progress bar can be disabled by calling `nsga(..., showprogress = false`)
+
+
+
+

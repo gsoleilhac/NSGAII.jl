@@ -1,4 +1,4 @@
-function _nsga(::indiv{G,Ph,Y}, sense, popSize, nbGen, init, z, fdecode, fdecode!, fCV , pmut, fmut, fcross, seed, fplot, plotevery)::Vector{indiv{G,Ph,Y}} where {G,Ph,Y}
+function _nsga(::indiv{G,Ph,Y}, sense, popSize, nbGen, init, z, fdecode, fdecode!, fCV , pmut, fmut, fcross, seed, fplot, plotevery, refreshtime)::Vector{indiv{G,Ph,Y}} where {G,Ph,Y}
 
     popSize = max(popSize, length(seed))
     isodd(popSize) && (popSize += 1)
@@ -12,8 +12,8 @@ function _nsga(::indiv{G,Ph,Y}, sense, popSize, nbGen, init, z, fdecode, fdecode
     end
     fast_non_dominated_sort!(view(P, 1:popSize), sense)
 
-    # @showprogress 0.2 for gen = 1:nbGen
-    for gen = 1:nbGen
+    @showprogress refreshtime for gen = 1:nbGen
+    # for gen = 1:nbGen
         
         for i = 1:2:popSize
 
