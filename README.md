@@ -32,7 +32,7 @@ The four mandatory parameters of NSGAII are
 ```julia
 popsize = 100
 nbgen = 200
-init() = bitrand(n) #our genotype is a binary vector of size n, initialized randomly:
+init() = bitrand(n) #our genotype is a binary vector of size n, initialized randomly
 z(x) = dot(x, p1), dot(x, p2) #and our objectives are the sum of the items we pick
 ```
 Now, this would be enough to run nsga-2 with
