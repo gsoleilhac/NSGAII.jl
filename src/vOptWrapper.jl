@@ -1,6 +1,6 @@
 function nsga(popSize, nbGen, m, ϵ::Int = 5; 
     pmut=0.05, fmut=default_mutation!, fcross = default_crossover!, 
-    seed=Vector{Float64}[], fplot = (x)->nothing, plotevery=10)
+    seed=Vector{Float64}[], fplot = (x)->nothing, plotevery=10, showprogress = true)
 
     vd = m.ext[:vOpt]
     @assert all(isfinite, m.colLower) "All variables must be bounded"
@@ -13,12 +13,12 @@ function nsga(popSize, nbGen, m, ϵ::Int = 5;
     else
         objSenses = map(s -> s == :Max ? -1 : 1, vd.objSenses)
     end
-    _nsga_vopt(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, ϵ,  pmut, fmut, fcross, seed, fplot, plotevery)
+    _nsga_vopt(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, ϵ,  pmut, fmut, fcross, seed, fplot, plotevery, showprogress)
 end
 
 function nsga_binary(popSize, nbGen, m ; 
     pmut=0.05, fmut=default_mutation!, fcross = default_crossover!, 
-    seed=Vector{BitVector}[], fplot = (x)->nothing, plotevery=10)
+    seed=Vector{BitVector}[], fplot = (x)->nothing, plotevery=10, showprogress = true)
 
     vd = m.ext[:vOpt]
     objs_constant = [obj.aff.constant for obj in vd.objs]
@@ -29,11 +29,11 @@ function nsga_binary(popSize, nbGen, m ;
     else
         objSenses = map(s -> s == :Max ? -1 : 1, vd.objSenses)
     end
-    _nsga_binary_vopt(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, pmut, fmut, fcross, seed, fplot, plotevery)
+    _nsga_binary_vopt(popSize, nbGen, m, vd, m.linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, pmut, fmut, fcross, seed, fplot, plotevery, showprogress)
 end
 
 
-function _nsga_vopt(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, ϵ, pmut, fmut, fcross, seed, fplot, plotevery)
+function _nsga_vopt(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, ϵ, pmut, fmut, fcross, seed, fplot, plotevery, showprogress)
 
     bc = BinaryCoding(ϵ, m.colCat, m.colLower, m.colUpper)
    
@@ -102,11 +102,11 @@ function _nsga_vopt(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, 
         if all(equalto(:Max), vd.objSenses)
             res = _nsga(indiv(falses(0), Float64[], Float64[], 0.), Max(), popSize, nbGen, 
             ()->bitrand(bc.nbbitstotal), z, x->decode(x, bc), (g,f)->decode!(g, bc, f), 
-            CV, pmut, fmut, fcross, encode.(seed, bc), fplot, plotevery)
+            CV, pmut, fmut, fcross, encode.(seed, bc), fplot, plotevery, showprogress ? 0.5 : Inf)
         else
             res = _nsga(indiv(falses(0), Float64[], Float64[], 0.), Min(), popSize, nbGen, 
             ()->bitrand(bc.nbbitstotal), z, x->decode(x, bc), (g,f)->decode!(g, bc, f), 
-            CV, pmut, fmut, fcross, encode.(seed, bc), fplot, plotevery)
+            CV, pmut, fmut, fcross, encode.(seed, bc), fplot, plotevery, showprogress ? 0.5 : Inf)
         end
 
         if !all(equalto(:Min), vd.objSenses) || !all(equalto(:Max), vd.objSenses)
@@ -118,7 +118,7 @@ function _nsga_vopt(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, 
     end
 end
 
-function _nsga_binary_vopt(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, pmut, fmut, fcross, seed, fplot, plotevery)
+function _nsga_binary_vopt(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, objs_coeffs, objs_vars, pmut, fmut, fcross, seed, fplot, plotevery, showprogress)
    
     function evaluate(cst, coeffs, vars, x)::Float64
         res = cst
@@ -170,15 +170,20 @@ function _nsga_binary_vopt(popSize, nbGen, m, vd, linconstr, objSenses, objs_con
         res
     end
 
-    x = bitrand(m.numCols)
-    @code_warntype CV(x)
+    # x = bitrand(m.numCols)
+    # @code_warntype CV(x)
 
     let vd=vd
 
+
         if all(equalto(:Max), vd.objSenses)
-            res = nsga_max(popSize, nbGen, z, ()->bitrand(m.numCols) ; fCV = CV,  pmut=pmut, fmut=fmut, fcross=fcross, seed=seed, fplot=fplot, plotevery=plotevery)
+            res = _nsga(indiv(falses(0), falses(0), Float64[], 0.), Max(), popSize, nbGen,
+            ()->bitrand(m.numCols), z, identity, (g,f)-> f .= g,
+            CV, pmut, fmut, fcross, seed, fplot, plotevery, showprogress ? 0.5 : Inf)
         else
-            res = nsga(popSize, nbGen, z, ()->bitrand(m.numCols) ; fCV = CV,  pmut=pmut, fmut=fmut, fcross=fcross, seed=seed, fplot=fplot, plotevery=plotevery)
+            res = _nsga(indiv(falses(0), falses(0), Float64[], 0.), Min(), popSize, nbGen,
+            ()->bitrand(m.numCols), z, identity, (g,f)-> f .= g,
+            CV, pmut, fmut, fcross, seed, fplot, plotevery, showprogress ? 0.5 : Inf)
         end
 
         if !all(equalto(:Min), vd.objSenses) || !all(equalto(:Max), vd.objSenses)
