@@ -172,11 +172,11 @@ function plot_pop(P)
     sleep(0.1)
 end
 
-nsga(200, 200, z, bc, seed = [[1.,-1.],[2.5,0.5],[0.5,0.25]], fplot=plot_pop, plotevery=1)
+nsga(200, 500, z, bc, seed = [[1.,-1.],[2.5,0.5],[0.5,0.25]], fplot=plot_pop, plotevery=10)
 ```
 
-* You don't have to provide a initialization function anymore, a bitstring of the appropriate length will be generated.
-* The seed can be passed as a vector of phenotypes, not a vector of genotypes, it will automatically be encoded.
+* The initialization function isn't needed anymore.
+* The seed is passed as a vector of phenotypes, not a vector of genotypes, it is automatically encoded.
 
 You can also use `BinaryCoding(ϵ::Int, types, lb, ub)` to encode a mix of integer, continuous or binary variables, with `types` a vector of symbols : `( :Int |  :Cont | :Bin )`.
 
