@@ -22,7 +22,7 @@ function nsga(popSize::Integer, nbGen::Integer, z::Function, bc::BinaryCoding ;
     fCV = x->0., pmut= 0.05, fmut=default_mutation!, fcross = default_crossover!, 
     seed=Vector{Float64}[], fplot = (x)->nothing, plotevery=1, showprogress = true)
     init = ()->bitrand(bc.nbbitstotal)
-    X = create_indiv(init, x->decode(x, bc), z, fCV)
+    X = create_indiv(init(), x->decode(x, bc), z, fCV)
     return _nsga(X, Min(), popSize, nbGen, init, z, x->decode(x, bc), (g,f)->decode!(g, bc, f), fCV , pmut, fmut, fcross, encode.(seed, bc), fplot, plotevery, showprogress ? 0.5 : Inf)
 end
 
@@ -37,7 +37,7 @@ function nsga_max(popSize::Integer, nbGen::Integer, z::Function, bc::BinaryCodin
     fCV = x->0., pmut= 0.05, fmut=default_mutation!, fcross = default_crossover!, 
     seed=Vector{Float64}[], fplot = (x)->nothing, plotevery=1, showprogress = true)
     init = ()->bitrand(bc.nbbitstotal)
-    X = create_indiv(init, x->decode(x, bc), z, fCV)
+    X = create_indiv(init(), x->decode(x, bc), z, fCV)
     return _nsga(X, Max(), popSize, nbGen, init, z, x->decode(x, bc), (g,f)->decode!(g, bc, f), fCV , pmut, fmut, fcross, encode.(seed, bc), fplot, plotevery, showprogress ? 0.5 : Inf)
 end
 
