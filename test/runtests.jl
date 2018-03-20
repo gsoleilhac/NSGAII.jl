@@ -20,9 +20,22 @@ res = nsga(500, 200, z, d, seed = seed)
 @test maximum(x -> x.y[2], res) >= 3.99
 @test minimum(x -> x.y[2], res) <= 1e-4
 
-m = vModel()
+@inferred nsga_max(500, 200, z, d, seed=seed)
+
 id = load2UKP(joinpath(@__DIR__, "2KP500-1A.DAT"))
 p1, p2, w, c = id.P1, id.P2, id.W, id.C
+n = length(p1)
+init()=rand(Bool, n)
+z(x) = dot(x, p1), dot(x, p2)
+function CV(x)
+    sumW = dot(x, w)
+    sumW > c ? sumW - c : 0
+end
+
+# @inferred nsga_max(100,200,z,init,fCV=CV) #this doesn't pass on 0.6, inference breaks when functions have more than 12 kwargs ...
+nsga_max(100,200,z,init,fCV=CV)
+
+m = vModel()
 @variable(m, x[1:length(p1)], Bin)
 @addobjective(m, Max, dot(x, p1))
 @addobjective(m, Max, dot(x, p2))
