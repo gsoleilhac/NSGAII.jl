@@ -35,7 +35,7 @@ function PMX_crossover!(pa, pb, ca, cb)
     copyto!(cb, cut_b+1, pa, cut_b+1, length(pa)-cut_b)
 
     @inbounds for i = cut_a:cut_b
-        if pa[i] ∉ pb[cut_a:cut_b]
+        if pa[i] ∉ view(pb, cut_a:cut_b)
             j = findfirst(equalto(pb[i]), pa)
             while j ∈ cut_a:cut_b
                 j = findfirst(equalto(pb[j]), pa)
@@ -43,7 +43,7 @@ function PMX_crossover!(pa, pb, ca, cb)
             cb[j] = pa[i]
         end
 
-        if pb[i] ∉ pa[cut_a:cut_b]
+        if pb[i] ∉ view(pa, cut_a:cut_b)
             j = findfirst(equalto(pa[i]), pb)
             while j ∈ cut_a:cut_b
                 j = findfirst(equalto(pa[j]), pb)
