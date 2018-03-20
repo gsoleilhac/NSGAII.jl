@@ -55,3 +55,12 @@ m = vModel()
 @constraint(m, 16x[1] + 20x[5] <= 86)
 @constraint(m, 13x[2] + 7x[4] <= 86)
 @inferred nsga(100, 200, m)
+
+
+
+
+const bc = BinaryCoding(6, [:Cont,:Cont,:Int,:Int,:Bin,:Int], [-10,-10,-10,10,0,0], [10,10,10,20,1,2])
+seed = [-9.5, 9.5, 5, 15, 1, 1]
+bincoded = NSGAII.encode(seed, bc)
+decoded = NSGAII.decode(bincoded, bc)
+@test all(decoded .≈ seed)

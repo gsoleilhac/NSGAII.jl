@@ -54,7 +54,7 @@ function decode!(x, d::BinaryCoding, res::Vector{Float64})
             if d.types[i] == :Cont
                 res[i] = d.lb[i] + val * (d.ub[i] - d.lb[i]) / (UInt128(2)^d.nbbits[i] - 1)
             else
-                res[i] = val - d.lb[i]
+                res[i] = val + d.lb[i]
             end
         end
     end
@@ -66,7 +66,7 @@ function encode(x, d::BinaryCoding)::BitVector
     sizehint!(res, d.nbbitstotal)
     for i = 1:d.nbvar
         if d.types[i] == :Int
-            tab = reverse(digits(Bool, round(Int, x[i] + d.lb[i]), 2, d.nbbits[i]))
+            tab = reverse(digits(Bool, round(Int, x[i] - d.lb[i]), 2, d.nbbits[i]))
             append!(res, tab)
         elseif d.types[i] == :Bin
             push!(res, x[i]!=0)
