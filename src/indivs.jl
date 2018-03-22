@@ -40,9 +40,16 @@ end
 Base.:(==)(a::indiv, b::indiv) = a.x == b.x
 Base.hash(a::indiv) = hash(a.x)
 Base.isless(a::indiv, b::indiv) = a.rank < b.rank || a.rank == b.rank && a.crowding >= b.crowding #Comparison operator for tournament selection
-Base.show(io::IO, ind::indiv) = print(io, "ind($(ind.pheno) : $(ind.y) | rank : $(ind.rank))")
-# (Base.show(io::IO, ind::indiv{G,P,N,Y}) where {G,P<:AbstractVector{Bool},N,Y}) = print(io, "ind($(String(map(x->x ? '1' : '0', ind.pheno))) : $(ind.y) | rank : $(ind.rank))")
-
+Base.show(io::IO, ind::indiv) = print(io, "indiv($(repr_pheno(ind.pheno)) : $(ind.y) | rank : $(ind.rank))")
+repr_pheno(x) = repr(x)
+function repr_pheno(x::Union{BitVector, Vector{Bool}}) 
+    res = map(x->x ? '1' : '0', x)
+    if length(res) <= 40
+        return "["*String(res)*"]"
+    else
+        return "["*String(res[1:15])*"..."*String(res[end-14:end])*"]"
+    end
+end
 
 function eval!(indiv::indiv, fdecode!::Function, z::Function, fCV::Function)
     fdecode!(indiv.x, indiv.pheno)
