@@ -178,11 +178,11 @@ function _nsga_binary_vopt(popSize, nbGen, m, vd, linconstr, objSenses, objs_con
 
         if all(equalto(:Max), vd.objSenses)
             res = _nsga(indiv(falses(0), falses(0), Float64[], 0.), Max(), popSize, nbGen,
-            ()->bitrand(m.numCols), z, identity, (g,f)-> f .= g,
+            ()->bitrand(m.numCols), z, identity, (g,f)-> (f.=g;nothing),
             CV, pmut, fmut, fcross, seed, fplot, plotevery, showprogress ? 0.5 : Inf)
         else
             res = _nsga(indiv(falses(0), falses(0), Float64[], 0.), Min(), popSize, nbGen,
-            ()->bitrand(m.numCols), z, identity, (g,f)-> f .= g,
+            ()->bitrand(m.numCols), z, identity, (g,f)-> (f.=g;nothing),
             CV, pmut, fmut, fcross, seed, fplot, plotevery, showprogress ? 0.5 : Inf)
         end
 

@@ -12,10 +12,11 @@ const C2 = [3 3 6 2 ; 5 3 7 3 ; 5 2 7 4 ; 4 6 3 5]
 const C3 = [4 2 5 3 ; 5 3 4 3 ; 4 3 5 2 ; 6 4 7 3]
 z(x, C) = sum(inds->C[inds...], enumerate(x))
 z(x::Vector{Int}) = z(x, C1), z(x, C2), z(x, C3)
+nsga(1000, 200, z, ()->randperm(4))
 SUITE["nsga"]["randperm"] = @benchmarkable nsga(1000, 200, z, ()->randperm(4))
 
 
-const d = RealCoding(6, [-10], [10])
+const d = BinaryCoding(6, [-10], [10])
 z(x) = x[1]^2, (x[1] - 2)^2
 seed = [-10 + rand()*20 for _ =1:100]
 nsga(1000, 20, z, d, seed = seed)
@@ -28,6 +29,7 @@ p1, p2, w, c = id.P1, id.P2, id.W, id.C
 @addobjective(m, Max, dot(x, p1))
 @addobjective(m, Max, dot(x, p2))
 @constraint(m, dot(x, w) <= c)
+nsga(1000, 20, m)
 SUITE["vOpt"]["Bi01KP"] = @benchmarkable nsga(1000, 200, $m)
 
 m = vModel()
@@ -42,4 +44,5 @@ m = vModel()
 @constraint(m, 7x[4] + 9x[5] + 19δ[3] <= 66)
 @constraint(m, 16x[1] + 20x[5] <= 86)
 @constraint(m, 13x[2] + 7x[4] <= 86)
+nsga(1000, 20, m)
 SUITE["vOpt"]["Mavrota"] = @benchmarkable nsga(1000, 200, $m)
