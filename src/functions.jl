@@ -52,12 +52,12 @@ function _nsga(::indiv{G,Ph,Y}, sense, popSize, nbGen, init, z, fdecode, fdecode
 end
 
 function fast_non_dominated_sort!(pop::AbstractVector{T}, sense) where {T}
-    F = T[]
     n = length(pop)
 
     for p in pop
         empty!(p.dom_list)
         p.dom_count = 0
+        p.rank = 0
     end
 
     @inbounds for i in 1:n
@@ -72,27 +72,24 @@ function fast_non_dominated_sort!(pop::AbstractVector{T}, sense) where {T}
         end
         if pop[i].dom_count == 0
             pop[i].rank = 1
-            push!(F, pop[i])
         end
     end
-    res = Vector{T}[]
-    i = 2
-    @inbounds while !isempty(F)
-        Q = T[]
-        for p in F
-            for q in p.dom_list
-                pop[q].dom_count -= 1
-                if pop[q].dom_count == 0
-                    pop[q].rank = i
-                    push!(Q, pop[q])
+
+    k = UInt16(2)
+    @inbounds while any(==(k-one(UInt16)), (p.rank for p in pop)) #ugly workaround for #15276
+        for p in pop 
+            if p.rank == k-one(UInt16)
+                for q in p.dom_list
+                    pop[q].dom_count -= one(UInt16)
+                    if pop[q].dom_count == zero(UInt16)
+                        pop[q].rank = k
+                    end
                 end
             end
         end
-        i += 1
-        push!(res, F)
-        F = Q
+        k += one(UInt16)
     end
-    res
+    nothing
 end
 
 function crowding_distance_assignement!(pop::AbstractVector{indiv{X,G,Y}}) where {X, G, Y}
