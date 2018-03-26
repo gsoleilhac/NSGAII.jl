@@ -41,7 +41,7 @@ function _nsga(::indiv{G,Ph,Y}, sense, popSize, nbGen, init, z, fdecode, fdecode
                 indnext = findlast(x->x.rank==f, P)
             end
             indnext == 0 && (indnext = length(P))
-            crowding_distance_assignement!(view(P, ind+1:indnext))
+            crowding_distance_assignment!(view(P, ind+1:indnext))
             sort!(view(P, ind+1:indnext), by = x -> x.crowding, rev=true, alg=PartialQuickSort(popSize-ind))
         end
 
@@ -92,9 +92,10 @@ function fast_non_dominated_sort!(pop::AbstractVector{T}, sense) where {T}
     nothing
 end
 
-function crowding_distance_assignement!(pop::AbstractVector{indiv{X,G,Y}}) where {X, G, Y}
+function crowding_distance_assignment!(pop::AbstractVector{indiv{X,G,Y}}) where {X, G, Y}
     if length(first(pop).y) == 2
         sort!(pop, by=x->x.y[1])
+        pop[1].y[1] == pop[end].y[1] && return #Don't waste time if all indivs are the same
         pop[1].crowding = pop[end].crowding = Inf
         @inbounds for i = 2:length(pop)-1
             pop[i].crowding = (pop[i+1].y[1]-pop[i-1].y[1]) / (pop[end].y[1]-pop[1].y[1])
