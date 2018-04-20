@@ -7,11 +7,12 @@ using NSGAII, PyPlot
 
 function plot_pop(P)
     clf()
+    P = filter(x->x.rank == 1, P)
     p = plot(map(x -> x.y[1], P), map(x -> x.y[2], P), "bo", markersize=1)
-    !isinteractive() && show()
-    sleep(0.2)
+    show()
+    sleep(0.1)
 end
 
 const d = BinaryCoding(6, [-10], [10])
 z(x) = ( x[1]^2 , (x[1]-2)^2 )
-nsga(200, 20, z, d, fplot = plot_pop)
+nsga(200, 30, z, d, fplot = plot_pop)

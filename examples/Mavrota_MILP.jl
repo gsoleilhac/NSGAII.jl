@@ -5,10 +5,9 @@ using PyPlot
 
 function plot_pop(P)
     clf()
-    feasible = filter(x -> x.CV == 0, P)
-    unfeasible = filter(x -> x.CV > 0, P)
     non_dom = filter(x ->x.rank == 1, P)
-    feasible = setdiff(feasible, non_dom)
+    feasible = filter(x -> x.CV == 0 && x.rank > 1, P)
+    unfeasible = filter(x -> x.CV > 0, P)
     p = plot3D(map(x -> x.y[1], feasible), map(x -> x.y[2], feasible), map(x -> x.y[3], feasible), "bo", markersize=1)
     p = plot3D(map(x -> x.y[1], unfeasible), map(x -> x.y[2], unfeasible), map(x -> x.y[3], unfeasible), "rx", markersize=3)
     p = plot3D(map(x -> x.y[1], non_dom), map(x -> x.y[2], non_dom), map(x -> x.y[3], non_dom), "go", markersize=1)
@@ -16,7 +15,7 @@ function plot_pop(P)
     ax[:set_xlim]([-95, 110])
     ax[:set_ylim]([-60, 45])
     ax[:set_zlim]([-50, 110])
-    !isinteractive() && show()
+    show()
     sleep(0.1)
 end
 
