@@ -109,7 +109,7 @@ function _nsga_vopt(popSize, nbGen, m, vd, linconstr, objSenses, objs_constant, 
             CV, pmut, fmut, fcross, encode.(seed, bc), fplot, plotevery, showprogress ? 0.5 : Inf)
         end
 
-        if !all(equalto(:Min), vd.objSenses) || !all(equalto(:Max), vd.objSenses)
+        if length(unique(vd.objSenses)) != 1
             for indiv in res
                 indiv.y .*= objSenses
             end
@@ -186,7 +186,7 @@ function _nsga_binary_vopt(popSize, nbGen, m, vd, linconstr, objSenses, objs_con
             CV, pmut, fmut, fcross, seed, fplot, plotevery, showprogress ? 0.5 : Inf)
         end
 
-        if !all(equalto(:Min), vd.objSenses) || !all(equalto(:Max), vd.objSenses)
+        if length(unique(vd.objSenses)) != 1
             for indiv in res
                 indiv.y = indiv.y .* objSenses
             end

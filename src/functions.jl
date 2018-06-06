@@ -6,6 +6,9 @@ function _nsga(::indiv{G,Ph,Y}, sense, popSize, nbGen, init, z, fdecode, fdecode
     P[1:popSize-length(seed)] .= [create_indiv(init(), fdecode, z, fCV) for _=1:popSize-length(seed)]
     for i = 1:length(seed)
         P[popSize-length(seed)+i] = create_indiv(convert(G, seed[i]), fdecode, z, fCV)
+        if fCV(P[popSize-length(seed)+i].pheno) > 0
+            warn("element $i of the seed is unfeasible")
+        end
     end
     for i=1:popSize
         P[popSize+i] = deepcopy(P[i])
