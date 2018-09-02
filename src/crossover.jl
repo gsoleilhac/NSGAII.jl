@@ -36,17 +36,17 @@ function PMX_crossover!(pa, pb, ca, cb)
 
     @inbounds for i = cut_a:cut_b
         if pa[i] ∉ view(pb, cut_a:cut_b)
-            j = findfirst(equalto(pb[i]), pa)
+            j = findfirst(isequal(pb[i]), pa)
             while j ∈ cut_a:cut_b
-                j = findfirst(equalto(pb[j]), pa)
+                j = findfirst(isequal(pb[j]), pa)
             end
             cb[j] = pa[i]
         end
 
         if pb[i] ∉ view(pa, cut_a:cut_b)
-            j = findfirst(equalto(pa[i]), pb)
+            j = findfirst(isequal(pa[i]), pb)
             while j ∈ cut_a:cut_b
-                j = findfirst(equalto(pa[j]), pb)
+                j = findfirst(isequal(pa[j]), pb)
             end
             ca[j] = pb[i]
         end

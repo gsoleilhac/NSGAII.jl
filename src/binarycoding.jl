@@ -66,7 +66,7 @@ function encode(x, d::BinaryCoding)::BitVector
     sizehint!(res, d.nbbitstotal)
     for i = 1:d.nbvar
         if d.types[i] == :Int
-            tab = reverse(digits(Bool, round(Int, x[i] - d.lb[i]), 2, d.nbbits[i]))
+            tab = reverse(digits(Bool, round(Int, x[i] - d.lb[i]), base=2, pad=d.nbbits[i]))
             append!(res, tab)
         elseif d.types[i] == :Bin
             push!(res, x[i]!=0)
@@ -76,7 +76,7 @@ function encode(x, d::BinaryCoding)::BitVector
             if target == UInt128(2)^d.nbbits[i] - 1
                 target -= 1
             end
-            tab = reverse(digits(Bool, target, 2, d.nbbits[i]))
+            tab = reverse(digits(Bool, target, base=2, pad=d.nbbits[i]))
             append!(res, tab)
         end
     end

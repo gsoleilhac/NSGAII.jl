@@ -1,6 +1,3 @@
 julia 0.6
-ProgressMeter
-Compat
-vOptGeneric
-vOptSpecific
-PkgBenchmark
+ProgressMeter 0.5
+Compat 1.1

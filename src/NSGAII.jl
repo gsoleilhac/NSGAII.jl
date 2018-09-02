@@ -2,7 +2,14 @@ __precompile__()
 module NSGAII
 
 export nsga, nsga_max, nsga_binary, BinaryCoding
-using ProgressMeter, Compat, Compat.Random, Compat.LinearAlgebra
+using ProgressMeter, Compat
+
+@static if VERSION > v"0.7-"
+	using Random
+	using LinearAlgebra
+else
+    Base.digits(::Type{T}, n::Integer ; base=10, pad=2) where T<:Integer = digits(T, n, base, pad)
+end
 
 include("indivs.jl")
 include("functions.jl")
@@ -24,6 +31,7 @@ function nsga(popSize::Integer, nbGen::Integer, z::Function, bc::BinaryCoding ;
     init = ()->bitrand(bc.nbbitstotal)
     X = create_indiv(init(), x->decode(x, bc), z, fCV)
     return _nsga(X, Min(), popSize, nbGen, init, z, x->decode(x, bc), (g,f)->decode!(g, bc, f), fCV , pmut, fmut, fcross, encode.(seed, bc), fplot, plotevery, showprogress ? 0.5 : Inf)
+    return _nsga(X, Min(), popSize, nbGen, init, z, x->decode(x, bc), (g,f)->decode!(g, bc, f), fCV , pmut, fmut, fcross, encode.(seed, (bc,)), fplot, plotevery, showprogress ? 0.5 : Inf)
 end
 
 function nsga_max(popSize::Integer, nbGen::Integer, z::Function, init::Function ; 
@@ -38,7 +46,7 @@ function nsga_max(popSize::Integer, nbGen::Integer, z::Function, bc::BinaryCodin
     seed = Vector{Float64}[], fplot = x->nothing, plotevery = 1, showprogress = true)
     init = ()->bitrand(bc.nbbitstotal)
     X = create_indiv(init(), x->decode(x, bc), z, fCV)
-    return _nsga(X, Max(), popSize, nbGen, init, z, x->decode(x, bc), (g,f)->decode!(g, bc, f), fCV , pmut, fmut, fcross, encode.(seed, bc), fplot, plotevery, showprogress ? 0.5 : Inf)
+    return _nsga(X, Max(), popSize, nbGen, init, z, x->decode(x, bc), (g,f)->decode!(g, bc, f), fCV , pmut, fmut, fcross, encode.(seed, (bc,)), fplot, plotevery, showprogress ? 0.5 : Inf)
 end
 
 end # module
