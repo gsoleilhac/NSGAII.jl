@@ -10,7 +10,8 @@ Kalyanmoy Deb, Samir Agrawal, Amrit Pratap, and T Meyarivan](https://pdfs.semant
 # Installation
 
 ```
-Pkg.clone("https://github.com/gsoleilhac/NSGAII.jl")
+julia> ]
+pkg> add https://github.com/gsoleilhac/NSGAII.jl
 ```
 
 # Usage
@@ -33,6 +34,9 @@ The four mandatory parameters of NSGAII are
 * an evaluation function
 
 ```julia
+using Random: bitrand
+using LinearAlgebra: dot
+
 popsize = 100
 nbgen = 200
 init() = bitrand(n) #our genotype is a binary vector of size n, initialized randomly
@@ -186,7 +190,4 @@ You can also use `BinaryCoding(ϵ::Int, types, lb, ub)` to encode a mix of integ
 ### Misc
 
 The progress bar can be disabled by calling `nsga(..., showprogress = false`)
-
-
-
 
