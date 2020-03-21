@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/gsoleilhac/NSGAII.jl.svg?branch=master)](https://travis-ci.org/gsoleilhac/NSGAII.jl)
+[![Build status](https://ci.appveyor.com/api/projects/status/0ufykequt91rk00n/branch/master?svg=true)](https://ci.appveyor.com/project/gsoleilhac/nsgaii-jl)
 [![codecov.io](http://codecov.io/github/gsoleilhac/NSGAII.jl/coverage.svg?branch=master)](http://codecov.io/github/gsoleilhac/NSGAII.jl?branch=master)
 
 # References 
