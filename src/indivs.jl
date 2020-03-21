@@ -22,7 +22,7 @@ function dominates(::Min, a::indiv, b::indiv)
     res = false
     for i in eachindex(a.y)
         @inbounds a.y[i] > b.y[i] && return false
-        @inbounds a.y[i] < b.y[i] && (res=true)
+        @inbounds a.y[i] < b.y[i] && (res = true)
     end
     res
 end
@@ -32,7 +32,7 @@ function dominates(::Max, a::indiv, b::indiv)
     res = false
     for i in eachindex(a.y)
         @inbounds a.y[i] < b.y[i] && return false
-        @inbounds a.y[i] > b.y[i] && (res=true)
+        @inbounds a.y[i] > b.y[i] && (res = true)
     end
     res
 end
@@ -43,7 +43,7 @@ Base.isless(a::indiv, b::indiv) = a.rank < b.rank || a.rank == b.rank && a.crowd
 Base.show(io::IO, ind::indiv) = print(io, "indiv($(repr_pheno(ind.pheno)) : $(ind.y) | rank : $(ind.rank))")
 repr_pheno(x) = repr(x)
 function repr_pheno(x::Union{BitVector, Vector{Bool}}) 
-    res = map(x->x ? '1' : '0', x)
+    res = map(x -> x ? '1' : '0', x)
     if length(res) <= 40
         return "["*String(res)*"]"
     else

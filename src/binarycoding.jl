@@ -8,7 +8,7 @@ struct BinaryCoding
 end
 
 function BinaryCoding(ϵ::Int, types::Vector{Symbol}, lb, ub)
-    @assert length(types)==length(lb)==length(ub)
+    @assert length(types) == length(lb) == length(ub)
     @assert all(lb .< ub)
     @assert UInt128(10)^ϵ <= UInt128(2)^127
 
@@ -37,12 +37,11 @@ function decode(x, d::BinaryCoding)
 end
 
 function decode!(x, d::BinaryCoding, res::Vector{Float64})
-
     j = 0
     for i = 1:d.nbvar
         j += d.nbbits[i]
         if d.types[i] == :Bin
-            res[i] = x[j]==1 ? 1. : 0.
+            res[i] = x[j] == 1 ? 1. : 0.
         else
             val = zero(UInt128)
             puis = one(UInt128)
@@ -66,7 +65,7 @@ function encode(x, d::BinaryCoding)::BitVector
     sizehint!(res, d.nbbitstotal)
     for i = 1:d.nbvar
         if d.types[i] == :Int
-            tab = reverse(digits(Bool, round(Int, x[i] - d.lb[i]), base=2, pad=d.nbbits[i]))
+            tab = reverse(digits(Bool, round(Int, x[i] - d.lb[i]), base = 2, pad = d.nbbits[i]))
             append!(res, tab)
         elseif d.types[i] == :Bin
             push!(res, x[i]!=0)
@@ -76,7 +75,7 @@ function encode(x, d::BinaryCoding)::BitVector
             if target == UInt128(2)^d.nbbits[i] - 1
                 target -= 1
             end
-            tab = reverse(digits(Bool, target, base=2, pad=d.nbbits[i]))
+            tab = reverse(digits(Bool, target, base = 2, pad = d.nbbits[i]))
             append!(res, tab)
         end
     end

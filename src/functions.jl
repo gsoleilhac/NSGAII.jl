@@ -1,16 +1,17 @@
-function _nsga(::indiv{G,Ph,Y}, sense, popSize, nbGen, init, z, fdecode, fdecode!, fCV , pmut, fmut, fcross, seed, fplot, plotevery, refreshtime)::Vector{indiv{G,Ph,Y}} where {G,Ph,Y}
+function _nsga(::indiv{G,Ph,Y}, sense, popSize, nbGen, init, z, fdecode, fdecode!, 
+    fCV , pmut, fmut, fcross, seed, fplot, plotevery, refreshtime)::Vector{indiv{G,Ph,Y}} where {G,Ph,Y}
 
     popSize = max(popSize, length(seed))
     isodd(popSize) && (popSize += 1)
     P = Vector{indiv{G,Ph,Y}}(undef, 2*popSize)
-    P[1:popSize-length(seed)] .= [create_indiv(init(), fdecode, z, fCV) for _=1:popSize-length(seed)]
+    P[1:popSize-length(seed)] .= [create_indiv(init(), fdecode, z, fCV) for _ = 1:popSize-length(seed)]
     for i = 1:length(seed)
         P[popSize-length(seed)+i] = create_indiv(convert(G, seed[i]), fdecode, z, fCV)
         if fCV(P[popSize-length(seed)+i].pheno) > 0
-            warn("element $i of the seed is unfeasible")
+            @warn "element $i of the seed is unfeasible"
         end
     end
-    for i=1:popSize
+    for i = 1:popSize
         P[popSize+i] = deepcopy(P[i])
     end
     fast_non_dominated_sort!(view(P, 1:popSize), sense)
@@ -33,25 +34,25 @@ function _nsga(::indiv{G,Ph,Y}, sense, popSize, nbGen, init, z, fdecode, fdecode
         end
 
         fast_non_dominated_sort!(P, sense)
-        sort!(P, by = x->x.rank, alg=Base.Sort.QuickSort)
+        sort!(P, by = x -> x.rank, alg = Base.Sort.QuickSort)
         
         let f::Int = 1
             ind = 0
-            indnext = findlast(x->x.rank==f, P)
+            indnext = findlast(x -> x.rank == f, P)
             while 0 < indnext <= popSize
                 ind = indnext
                 f += 1
-                indnext = findlast(x->x.rank==f, P)
+                indnext = findlast(x -> x.rank == f, P)
             end
             indnext == 0 && (indnext = length(P))
             crowding_distance_assignment!(view(P, ind+1:indnext))
-            sort!(view(P, ind+1:indnext), by = x -> x.crowding, rev=true, alg=PartialQuickSort(popSize-ind))
+            sort!(view(P, ind+1:indnext), by = x -> x.crowding, rev = true, alg = PartialQuickSort(popSize-ind))
         end
 
         gen % plotevery == 0 && fplot(P)
     end
     fplot(P)
-    filter(x->x.rank==1, view(P, 1:popSize))
+    filter(x -> x.rank == 1, view(P, 1:popSize))
 end
 
 function fast_non_dominated_sort!(pop::AbstractVector{T}, sense) where {T}
@@ -95,14 +96,16 @@ function fast_non_dominated_sort!(pop::AbstractVector{T}, sense) where {T}
     nothing
 end
 
-function crowding_distance_assignment!(pop::AbstractVector{indiv{X,G,Y}}) where {X, G, Y}
-    if length(first(pop).y) == 2
-        sort!(pop, by=x->x.y[1])
+function crowding_distance_assignment!(pop::AbstractVector{indiv{X, G, NTuple{N, T}}}) where {X, G, N, T}
+    if N == 2
+        sort!(pop, by = x -> x.y[1])
         pop[1].y[1] == pop[end].y[1] && return #Don't waste time if all indivs are the same
         pop[1].crowding = pop[end].crowding = Inf
+
+        width_y1 = (pop[end].y[1] - pop[1].y[1])
+        width_y2 = (pop[1].y[2] - pop[end].y[2])
         @inbounds for i = 2:length(pop)-1
-            pop[i].crowding = (pop[i+1].y[1]-pop[i-1].y[1]) / (pop[end].y[1]-pop[1].y[1])
-            pop[i].crowding += (pop[i-1].y[2]-pop[i+1].y[2]) / (pop[1].y[2]-pop[end].y[2])
+            pop[i].crowding = (pop[i+1].y[1] - pop[i-1].y[1]) / width_y1 + (pop[i-1].y[2] - pop[i+1].y[2]) / width_y2
         end
     else
         for ind in pop
@@ -110,12 +113,12 @@ function crowding_distance_assignment!(pop::AbstractVector{indiv{X,G,Y}}) where 
         end
         @inbounds for j = 1:length(first(pop).y) # Foreach objective
             let j = j #https://github.com/JuliaLang/julia/issues/15276
-                sort!(pop, by = x-> x.y[j]) #sort by the objective value
+                sort!(pop, by = x -> x.y[j]) #sort by the objective value
             end
             pop[1].crowding = pop[end].crowding = Inf #Assign infinite value to extremas
             if pop[1].y[j] != pop[end].y[j]
                 for i = 2:length(pop)-1
-                    pop[i].crowding += (pop[i+1].y[j]-pop[i-1].y[j]) / (pop[end].y[j]-pop[1].y[j])
+                    pop[i].crowding += (pop[i+1].y[j] - pop[i-1].y[j]) / (pop[end].y[j] - pop[1].y[j])
                 end
             end
         end

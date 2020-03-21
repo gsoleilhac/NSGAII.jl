@@ -1,22 +1,18 @@
 __precompile__()
 module NSGAII
 
-export nsga, nsga_max, nsga_binary, BinaryCoding
-using ProgressMeter, Compat
+export nsga, nsga_max, BinaryCoding #, nsga_binary
 
-@static if VERSION > v"0.7-"
-	using Random
-	using LinearAlgebra
-else
-    Base.digits(::Type{T}, n::Integer ; base=10, pad=2) where T<:Integer = digits(T, n, base, pad)
-end
+using ProgressMeter
+using Random
+using LinearAlgebra
 
 include("indivs.jl")
 include("functions.jl")
 include("crossover.jl")
 include("mutation.jl")
 include("binarycoding.jl")
-include("vOptWrapper.jl")
+# include("vOptWrapper.jl")
 
 function nsga(popSize::Integer, nbGen::Integer, z::Function, init::Function ; 
     fdecode = identity, fdecode! = (g,p)-> (p.=g;nothing), fCV = x->0., pmut = 0.05, fmut = default_mutation!, 

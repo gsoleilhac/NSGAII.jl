@@ -1,12 +1,6 @@
+using Test
 using NSGAII
-
-@static if VERSION > v"0.7-"
-	using Random
-    using LinearAlgebra
-    using Test
-else
-    using Base.Test
-end
+using Random, LinearAlgebra
 
 const C1 = [2 5 4 7 ; 3 3 5 7 ; 3 8 4 2 ; 6 5 2 5]
 const C2 = [3 3 6 2 ; 5 3 7 3 ; 5 2 7 4 ; 4 6 3 5]
@@ -25,7 +19,7 @@ res = nsga(500, 200, z, d, seed = seed)
 @test maximum(x -> x.y[2], res) >= 3.99
 @test minimum(x -> x.y[2], res) <= 1e-4
 
-@inferred nsga_max(500, 200, z, d, seed=seed)
+@inferred nsga_max(500, 200, z, d, seed = seed)
 
 const bc = BinaryCoding(6, [:Cont,:Cont,:Int,:Int,:Bin,:Int], [-10,-10,-10,10,0,0], [10,10,10,20,1,2])
 seed = [-9.5, 9.5, 5, 15, 1, 1]

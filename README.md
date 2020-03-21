@@ -145,7 +145,7 @@ using PyPlot
 function plot_pop(P)
     clf() #clears the figure
     P = filter(indiv -> indiv.rank == 1, P) #keep only the non-dominated solutions
-    plot(map(x -> x.y[1], P), map(x -> x.y[2], P), "bo", markersize=1)
+    plot(map(x -> x.y[1], P), map(x -> x.y[2], P), "bo", markersize = 1)
     sleep(0.1)
 end
 
@@ -175,11 +175,11 @@ const bc = BinaryCoding(4, [-400, -400], [400, 400])
 function plot_pop(P)
     clf() #clears the figure
     P = filter(indiv -> indiv.rank <= 1, P) #keeps only the non-dominated solutions
-    plot3D(map(x -> x.y[1], P), map(x -> x.y[2], P),  map(x -> x.y[3], P), "bo", markersize=1)
+    plot3D(map(x -> x.y[1], P), map(x -> x.y[2], P),  map(x -> x.y[3], P), "bo", markersize = 1)
     sleep(0.1)
 end
 
-nsga(200, 500, z, bc, seed = [[1.,-1.],[2.5,0.5],[0.5,0.25]], fplot=plot_pop, plotevery=10)
+nsga(200, 500, z, bc, seed = [[1.,-1.],[2.5,0.5],[0.5,0.25]], fplot = plot_pop, plotevery = 10)
 ```
 
 * The initialization function isn't needed anymore.

@@ -8,9 +8,9 @@ function plot_pop(P)
     non_dom = filter(x ->x.rank == 1, P)
     feasible = filter(x -> x.CV == 0 && x.rank > 1, P)
     unfeasible = filter(x -> x.CV > 0, P)
-    p = plot3D(map(x -> x.y[1], feasible), map(x -> x.y[2], feasible), map(x -> x.y[3], feasible), "bo", markersize=1)
-    p = plot3D(map(x -> x.y[1], unfeasible), map(x -> x.y[2], unfeasible), map(x -> x.y[3], unfeasible), "rx", markersize=3)
-    p = plot3D(map(x -> x.y[1], non_dom), map(x -> x.y[2], non_dom), map(x -> x.y[3], non_dom), "go", markersize=1)
+    p = plot3D(map(x -> x.y[1], feasible), map(x -> x.y[2], feasible), map(x -> x.y[3], feasible), "bo", markersize = 1)
+    p = plot3D(map(x -> x.y[1], unfeasible), map(x -> x.y[2], unfeasible), map(x -> x.y[3], unfeasible), "rx", markersize = 3)
+    p = plot3D(map(x -> x.y[1], non_dom), map(x -> x.y[2], non_dom), map(x -> x.y[3], non_dom), "go", markersize = 1)
     ax = gca()
     ax[:set_xlim]([-95, 110])
     ax[:set_ylim]([-60, 45])
@@ -39,7 +39,7 @@ m = vModel(solver = GLPKSolverMIP())
 
 print(m)
 
-res = nsga(500, 50, m, fplot=plot_pop);
+res = nsga(500, 50, m, fplot = plot_pop);
 
 solve(m, method=:lex)
 println("\nRésolution lexico-graphique : ")
@@ -72,9 +72,9 @@ println("CV : $(x3.CV)")
 
 println("\n Résolution en partant des solutions lex-optimales")
 
-seed = [vcat(getvalue(x, i), getvalue(δ, i)) for i=1:2:6]
+seed = [vcat(getvalue(x, i), getvalue(δ, i)) for i = 1:2:6]
 
-res = nsga(500, 50, m, fplot=plot_pop, seed=seed);
+res = nsga(500, 50, m, fplot = plot_pop, seed = seed);
 
 println()
 println("Meilleur individu sur le premier objectif")

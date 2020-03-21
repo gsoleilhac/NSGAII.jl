@@ -16,15 +16,15 @@ m = vModel(solver = GLPKSolverMIP())
 
 function plot_pop(P)
     clf()
-    P = filter(x->x.rank==1, P)
-    plot(map(x -> x.y[1], P), map(x -> x.y[2], P), "bo", markersize=2, label="nsga")
+    P = filter(x -> x.rank == 1, P)
+    plot(map(x -> x.y[1], P), map(x -> x.y[2], P), "bo", markersize = 2, label="nsga")
     show()
     sleep(0.1)
 end
 
 function greedy(p, w, c)
-    order = sortperm(p./w, rev=true)
-    sum_weight=0
+    order = sortperm(p./w, rev = true)
+    sum_weight = 0
     res = falses(length(w))
     for i = 1:length(p)
         if w[order[i]] + sum_weight <= c
@@ -36,7 +36,7 @@ function greedy(p, w, c)
 end
 
 seed = [greedy(α.*p1 .+ (1-α)*p2, w, c) for α=0:0.2:1]
-nsga(100, 10000, m, fplot=plot_pop, seed=seed, plotevery=1000)
+nsga(100, 10000, m, fplot = plot_pop, seed = seed, plotevery = 1000)
 
 solve(m, method=:epsilon)
 Y_N = getY_N(m)
