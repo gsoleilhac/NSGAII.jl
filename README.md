@@ -71,7 +71,7 @@ The revelant fields of an individual *`indiv`* are :
 
 ### Crossover
 
-If the solutions are encoded as bitstrings, nsga will use by default a 2-point crossover, but we can define our own and assign it with the keyword `fcross`:
+If the solutions are encoded as bitstrings, a [2-point crossover](https://github.com/gsoleilhac/NSGAII.jl/blob/master/src/crossover.jl#L5-L19) will be used by default, but we can define our own and assign it with the keyword `fcross`:
 
 ```julia
 function one_point_crossover!(parent_a, parent_b, child_a, child_b)
@@ -88,11 +88,11 @@ end
 nsga_max(popsize, nbgen, z, init, fCV = CV, fcross = one_point_crossover!)
 ```
 
-*For permutations genotypes, the default crossover is the PMX (Partially-Mapped Crossover).*
+For permutations genotypes, the default crossover is the [PMX (Partially-Mapped Crossover)](https://github.com/gsoleilhac/NSGAII.jl/blob/master/src/crossover.jl#L22-L54)
 
 ### Mutation
 
-The default mutation for a binary vector is the *bitstring mutation* where each bit has a probability 1/l to be flipped (where l is the length of the vector)
+The default mutation for a binary vector is the [bitstring mutation](https://github.com/gsoleilhac/NSGAII.jl/blob/master/src/mutation.jl#L2-L9) where each bit has a probability 1/l to be flipped (where l is the length of the vector)
 
 As with crossovers, we can define or own mutation operator and assign it with the keyword `fmut`. The probability of mutation can be changed with the keyword `pmut`.
 
@@ -109,7 +109,7 @@ end
 nsga_max(popsize, nbgen, z, init, fCV = CV, fmut = two_bits_flip!, pmut = 0.2)
 ```
 
-*For permutations genotypes, the default mutation randomly swaps two indices.*
+*For permutations genotypes, the default mutation randomly [swaps](https://github.com/gsoleilhac/NSGAII.jl/blob/master/src/mutation.jl#L12-L18) two indices.*
 
 ### Genotype and Phenotype
 
@@ -117,7 +117,7 @@ So far, we haven't made any difference between the genotype and the phenotype ; 
 
 You can provide your own with the keywords `fdecode` and `fdecode!` which will work in-place.
 
-Note : if your decode function takes a genotype `G` and returns a phenotype `P`, make sure your crossovers and mutations functions work on type `G`, and that your evaluation and (if provided) your constraint-violation  functions work on type `P`.  
+Note : if your decode function takes a genotype `G` and returns a phenotype `P`, make sure your crossovers and mutations functions work on type `G`, and that your evaluation and (if provided) your constraint-violation functions work on type `P`.  
 `fdecode!` should take as parameters a genotype `G` and a phenotype `P` and modify it in-place.
 
 See [BinaryCoding](https://github.com/gsoleilhac/NSGAII.jl#binarycoding) to easily encode/decode real variables.
