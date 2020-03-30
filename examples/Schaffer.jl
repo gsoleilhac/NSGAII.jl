@@ -3,13 +3,11 @@
 # L. Erlbaum Associates Inc. pp. 93–100, 1985.
 # http://dl.acm.org/citation.cfm?id = 645511.657079
 
-using NSGAII, PyPlot
+using NSGAII, Plots
 
-function plot_pop(P)
-    clf()
-    P = filter(x -> x.rank == 1, P)
-    p = plot(map(x -> x.y[1], P), map(x -> x.y[2], P), "bo", markersize = 1)
-    show()
+function plot_pop(pop)
+    pop = filter(x -> x.rank == 1, pop)
+    display(scatter(map(x -> x.y[1], pop), map(x -> x.y[2], pop), markersize = 1))
     sleep(0.1)
 end
 

@@ -164,7 +164,8 @@ Example : MOP7 from Van Valedhuizen’s Test Suite
 ![MOP7](https://raw.githubusercontent.com/gsoleilhac/NSGAII.jl/master/MOP7.png "MOP7")
 
 ```julia 
-using NSGAII, PyPlot
+using NSGAII
+using Plots: scatter3d
 
 f1(x1,x2) = ((x1-1)^2)/2 + ((x2+1)^2)/13 + 3
 f2(x1,x2) = ((x1+x2-3)^2)/2 + ((-x1+x2+2)^2)/8 - 17
@@ -175,15 +176,16 @@ z(x) = f1(x[1], x[2]), f2(x[1], x[2]), f3(x[1], x[2])
 #Encodes two variables -400 <= x_i <= 400, with a precision of 1E-4
 const bc = BinaryCoding(4, [-400, -400], [400, 400]) 
 
-function plot_pop(P)
-    clf() #clears the figure
-    P = filter(indiv -> indiv.rank <= 1, P) #keeps only the non-dominated solutions
-    plot3D(map(x -> x.y[1], P), map(x -> x.y[2], P),  map(x -> x.y[3], P), "bo", markersize = 1)
+function plot_pop(pop)
+    pop = filter(indiv -> indiv.rank <= 1, pop) #keeps only the non-dominated solutions
+    scatter3d(map(x -> x.y[1], pop), map(x -> x.y[2], pop),  map(x -> x.y[3], pop), markersize = 1) |> display
     sleep(0.1)
 end
 
-nsga(200, 500, z, bc, seed = [[1.,-1.],[2.5,0.5],[0.5,0.25]], fplot = plot_pop, plotevery = 10)
+nsga(500, 100, z, bc, seed = [[1.,-1.],[2.5,0.5],[0.5,0.25]], fplot = plot_pop)
 ```
+
+![MOP7GIF](https://raw.githubusercontent.com/gsoleilhac/NSGAII.jl/master/MOP7.gif)
 
 * The initialization function isn't needed anymore.
 * The seed is passed as a vector of phenotypes, not a vector of genotypes, it is automatically encoded.

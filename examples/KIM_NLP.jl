@@ -3,13 +3,12 @@
 # Vol. 29, Num. 2, pp. 149–158, 2005.
 # https://link.springer.com/article/10.1007/s00158-004-0465-1
 
-using NSGAII, PyPlot
+using NSGAII
+using Plots: scatter
 
-function plot_pop(P)
-    clf()
-    P = filter(x -> x.rank == 1, P)
-    plot(map(x -> x.y[1], P), map(x -> x.y[2], P), "bo", markersize = 1)
-    show()
+function plot_pop(pop)
+    pop = filter(x -> x.rank == 1, pop)
+    display(scatter(map(x -> x.y[1], pop), map(x -> x.y[2], pop), markersize = 1))
     sleep(0.1)
 end
 
