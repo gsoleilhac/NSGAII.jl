@@ -185,7 +185,9 @@ end
 nsga(500, 100, z, bc, seed = [[1.,-1.],[2.5,0.5],[0.5,0.25]], fplot = plot_pop)
 ```
 
-![MOP7GIF](https://raw.githubusercontent.com/gsoleilhac/NSGAII.jl/master/MOP7.gif)
+<p align="center">
+  <img width="460" height="300" src="https://raw.githubusercontent.com/gsoleilhac/NSGAII.jl/master/MOP7.gif">
+</p>
 
 * The initialization function isn't needed anymore.
 * The seed is passed as a vector of phenotypes, not a vector of genotypes, it is automatically encoded.
