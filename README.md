@@ -14,7 +14,7 @@ Kalyanmoy Deb, Samir Agrawal, Amrit Pratap, and T Meyarivan](https://pdfs.semant
 
 ```
 julia> ]
-pkg> add https://github.com/gsoleilhac/NSGAII.jl
+pkg> add NSGAII
 ```
 
 # Usage
