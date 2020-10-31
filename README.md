@@ -161,14 +161,14 @@ You can use `BinaryCoding(ϵ::Int, lb::Vector, ub::Vector)` to encode real varia
 
 Example : MOP7 from Van Valedhuizen’s Test Suite  
 
-![MOP7](https://raw.githubusercontent.com/gsoleilhac/NSGAII.jl/master/MOP7.png "MOP7")
+![MOP7](https://raw.githubusercontent.com/gsoleilhac/NSGAII.jl/master/examples/MOP7.png "MOP7")
 
 ```julia 
 using NSGAII
 using Plots: scatter3d
 
-f1(x1,x2) = ((x1-1)^2)/2 + ((x2+1)^2)/13 + 3
-f2(x1,x2) = ((x1+x2-3)^2)/2 + ((-x1+x2+2)^2)/8 - 17
+f1(x1,x2) = ((x1-2)^2)/2 + ((x2+1)^2)/13 + 3
+f2(x1,x2) = ((x1+x2-3)^2)/36 + ((-x1+x2+2)^2)/8 - 17
 f3(x1,x2) = ((x1+2x2-1)^2)/175 + ((-x1+2x2)^2)/17 - 13
 
 z(x) = f1(x[1], x[2]), f2(x[1], x[2]), f3(x[1], x[2])
@@ -186,7 +186,7 @@ nsga(500, 100, z, bc, seed = [[1.,-1.],[2.5,0.5],[0.5,0.25]], fplot = plot_pop)
 ```
 
 <p align="center">
-  <img width="460" height="300" src="https://raw.githubusercontent.com/gsoleilhac/NSGAII.jl/master/MOP7.gif">
+  <img width="460" height="300" src="https://raw.githubusercontent.com/gsoleilhac/NSGAII.jl/master/examples/MOP7.gif">
 </p>
 
 * The initialization function isn't needed anymore.
