@@ -1,6 +1,8 @@
 function crossover!(ind_a, ind_b, fcross, child_a, child_b)
     fcross(ind_a.x, ind_b.x, child_a.x, child_b.x)
 end
+(default_crossover!(pa::T, pb::T, ca, cb)) where T<:AbstractVector{Bool} = two_point_crossover!(pa, pb, ca, cb)
+(default_crossover!(pa::T, pb::T, ca, cb)) where T<:AbstractVector{Int} = PMX_crossover!(pa, pb, ca, cb)
 
 function two_point_crossover!(bits_a, bits_b, child1, child2)
     cut_a = cut_b = rand(2:length(bits_a)-1)
@@ -17,7 +19,6 @@ function two_point_crossover!(bits_a, bits_b, child1, child2)
     copyto!(child2, cut_a, bits_a, cut_a, cut_b-cut_a+1)
     copyto!(child2, cut_b+1, bits_b, cut_b+1, length(bits_a)-cut_b)
 end
-(default_crossover!(pa::T, pb::T, ca, cb)) where T<:AbstractVector{Bool} = two_point_crossover!(pa, pb, ca, cb)
 
 function PMX_crossover!(pa, pb, ca, cb)
     cut_a = cut_b = rand(1:length(pa))
@@ -52,4 +53,3 @@ function PMX_crossover!(pa, pb, ca, cb)
         end
     end
 end
-(default_crossover!(pa::T, pb::T, ca, cb)) where T<:AbstractVector{Int} = PMX_crossover!(pa, pb, ca, cb)

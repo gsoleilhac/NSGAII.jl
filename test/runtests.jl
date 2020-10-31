@@ -24,5 +24,5 @@ res = nsga(500, 200, z, d, seed = seed)
 const bc = BinaryCoding(6, [:Cont,:Cont,:Int,:Int,:Bin,:Int], [-10,-10,-10,10,0,0], [10,10,10,20,1,2])
 seed = [-9.5, 9.5, 5, 15, 1, 1]
 bincoded = NSGAII.encode(seed, bc)
-decoded = NSGAII.decode(bincoded, bc)
-@test all(decoded .≈ seed)
+NSGAII.decode!(bincoded, bc)
+@test all(bincoded.p .≈ seed)

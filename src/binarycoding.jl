@@ -7,6 +7,11 @@ struct BinaryCoding
     nbbitstotal::Int
 end
 
+struct BinaryCodedIndiv
+    x::BitVector
+    p::Vector{Float64}
+end
+
 function BinaryCoding(ϵ::Int, types::Vector{Symbol}, lb, ub)
     @assert length(types) == length(lb) == length(ub)
     @assert all(lb .< ub)
@@ -29,54 +34,48 @@ function BinaryCoding(ϵ::Int, types::Vector{Symbol}, lb, ub)
 end
 BinaryCoding(ϵ::Int, lb, ub) = BinaryCoding(ϵ, fill(:Cont, length(lb)), lb, ub)
 
-
-function decode(x, d::BinaryCoding)
-    res = zeros(d.nbvar)
-    decode!(x, d, res)
-    res
-end
-
-function decode!(x, d::BinaryCoding, res::Vector{Float64})
+function decode!(indiv::BinaryCodedIndiv, d::BinaryCoding)
     j = 0
     for i = 1:d.nbvar
         j += d.nbbits[i]
         if d.types[i] == :Bin
-            res[i] = x[j] == 1 ? 1. : 0.
+            indiv.p[i] = indiv.x[j] == 1 ? 1. : 0.
         else
             val = zero(UInt128)
             puis = one(UInt128)
             for ind = j:-1:j-d.nbbits[i]+1
-                x[ind] && (val += puis)
+                indiv.x[ind] && (val += puis)
                 puis *= 2
             end
 
             if d.types[i] == :Cont
-                res[i] = d.lb[i] + val * (d.ub[i] - d.lb[i]) / (UInt128(2)^d.nbbits[i] - 1)
+                indiv.p[i] = d.lb[i] + val * (d.ub[i] - d.lb[i]) / (UInt128(2)^d.nbbits[i] - 1)
             else
-                res[i] = val + d.lb[i]
+                indiv.p[i] = val + d.lb[i]
             end
         end
     end
-    res
+    indiv
 end
 
-function encode(x, d::BinaryCoding)::BitVector
-    res = BitVector()
-    sizehint!(res, d.nbbitstotal)
+encode(p, d) = encode([p], d)
+function encode(p::AbstractVector, d::BinaryCoding)::BinaryCodedIndiv
+    res = BinaryCodedIndiv(BitVector(), p)
+    sizehint!(res.x, d.nbbitstotal)
     for i = 1:d.nbvar
         if d.types[i] == :Int
-            tab = reverse(digits(Bool, round(Int, x[i] - d.lb[i]), base = 2, pad = d.nbbits[i]))
-            append!(res, tab)
+            tab = reverse(digits(Bool, round(Int, res.p[i] - d.lb[i]), base = 2, pad = d.nbbits[i]))
+            append!(res.x, tab)
         elseif d.types[i] == :Bin
-            push!(res, x[i]!=0)
+            push!(res.x, p[i]!=0)
         else
-            t = (x[i] - d.lb[i]) / (d.ub[i] - d.lb[i]) * (UInt128(2)^d.nbbits[i] - 1)
+            t = (p[i] - d.lb[i]) / (d.ub[i] - d.lb[i]) * (UInt128(2)^d.nbbits[i] - 1)
             target = round(UInt128, t)
             if target == UInt128(2)^d.nbbits[i] - 1
                 target -= 1
             end
             tab = reverse(digits(Bool, target, base = 2, pad = d.nbbits[i]))
-            append!(res, tab)
+            append!(res.x, tab)
         end
     end
     res

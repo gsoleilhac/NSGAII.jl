@@ -65,7 +65,6 @@ result = nsga_max(popsize, nbgen, z, init, fCV = CV)
 The revelant fields of an individual *`indiv`* are :
 * genotype : `indiv.x`
 * objective values : `indiv.y`
-* phenotype : `indiv.pheno`
 * rank : `indiv.rank`
 * constraint violation value : `indiv.CV`
 
@@ -110,18 +109,6 @@ nsga_max(popsize, nbgen, z, init, fCV = CV, fmut = two_bits_flip!, pmut = 0.2)
 ```
 
 *For permutations genotypes, the default mutation randomly [swaps](https://github.com/gsoleilhac/NSGAII.jl/blob/master/src/mutation.jl#L12-L18) two indices.*
-
-### Genotype and Phenotype
-
-So far, we haven't made any difference between the genotype and the phenotype ; the default decoding function used here is the *identity* function
-
-You can provide your own with the keywords `fdecode` and `fdecode!` which will work in-place.
-
-Note : if your decode function takes a genotype `G` and returns a phenotype `P`, make sure your crossovers and mutations functions work on type `G`, and that your evaluation and (if provided) your constraint-violation functions work on type `P`.  
-`fdecode!` should take as parameters a genotype `G` and a phenotype `P` and modify it in-place.
-
-See [BinaryCoding](https://github.com/gsoleilhac/NSGAII.jl#binarycoding) to easily encode/decode real variables.
-
 
 ### Seeding
 

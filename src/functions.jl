@@ -1,13 +1,13 @@
-function _nsga(::indiv{G,Ph,Y}, sense, popSize, nbGen, init, z, fdecode, fdecode!, 
-    fCV , pmut, fmut, fcross, seed, fplot, plotevery, refreshtime)::Vector{indiv{G,Ph,Y}} where {G,Ph,Y}
+function _nsga(::Indiv{G, Y}, sense, popSize, nbGen, init, z, 
+    fCV, pmut, fmut, fcross, seed, fplot, plotevery, refreshtime)::Vector{Indiv{G, Y}} where {G,Y}
 
     popSize = max(popSize, length(seed))
     isodd(popSize) && (popSize += 1)
-    P = Vector{indiv{G,Ph,Y}}(undef, 2*popSize)
-    P[1:popSize-length(seed)] .= [create_indiv(init(), fdecode, z, fCV) for _ = 1:popSize-length(seed)]
+    P = Vector{Indiv{G, Y}}(undef, 2 * popSize)
+    P[1:(popSize - length(seed))] .= [createIndiv(init(), z, fCV) for _ = 1:(popSize - length(seed))]
     for i = 1:length(seed)
-        P[popSize-length(seed)+i] = create_indiv(convert(G, seed[i]), fdecode, z, fCV)
-        if fCV(P[popSize-length(seed)+i].pheno) > 0
+        P[popSize - length(seed) + i] = createIndiv(convert(G, seed[i]), z, fCV)
+        if fCV(P[popSize - length(seed) + i].x) > 0
             @warn "element $i of the seed is unfeasible"
         end
     end
@@ -17,20 +17,18 @@ function _nsga(::indiv{G,Ph,Y}, sense, popSize, nbGen, init, z, fdecode, fdecode
     fast_non_dominated_sort!(view(P, 1:popSize), sense)
 
     @showprogress refreshtime for gen = 1:nbGen
-    # for gen = 1:nbGen
-        
         for i = 1:2:popSize
 
             pa = tournament_selection(P)
             pb = tournament_selection(P)
 
-            crossover!(pa, pb, fcross, P[popSize+i], P[popSize+i+1])
+            crossover!(pa, pb, fcross, P[popSize + i], P[popSize + i + 1])
 
-            rand() < pmut && mutate!(P[popSize+i], fmut)
-            rand() < pmut && mutate!(P[popSize+i+1], fmut)
+            rand() < pmut && mutate!(P[popSize + i], fmut)
+            rand() < pmut && mutate!(P[popSize + i + 1], fmut)
 
-            eval!(P[popSize+i], fdecode!, z, fCV)
-            eval!(P[popSize+i+1], fdecode!, z, fCV)
+            eval!(P[popSize + i], z, fCV)
+            eval!(P[popSize + i + 1], z, fCV)
         end
 
         fast_non_dominated_sort!(P, sense)
@@ -46,7 +44,7 @@ function _nsga(::indiv{G,Ph,Y}, sense, popSize, nbGen, init, z, fdecode, fdecode
             end
             indnext == 0 && (indnext = length(P))
             crowding_distance_assignment!(view(P, ind+1:indnext))
-            sort!(view(P, ind+1:indnext), by = x -> x.crowding, rev = true, alg = PartialQuickSort(popSize-ind))
+            sort!(view(P, (ind + 1):indnext), by = x -> x.crowding, rev = true, alg = PartialQuickSort(popSize - ind))
         end
 
         gen % plotevery == 0 && fplot(P)
@@ -96,7 +94,7 @@ function fast_non_dominated_sort!(pop::AbstractVector{T}, sense) where {T}
     nothing
 end
 
-function crowding_distance_assignment!(pop::AbstractVector{indiv{X, G, NTuple{N, T}}}) where {X, G, N, T}
+function crowding_distance_assignment!(pop::AbstractVector{Indiv{X, NTuple{N, T}}}) where {X, N, T}
     if N == 2
         sort!(pop, by = x -> x.y[1])
         pop[1].y[1] == pop[end].y[1] && return #Don't waste time if all indivs are the same
